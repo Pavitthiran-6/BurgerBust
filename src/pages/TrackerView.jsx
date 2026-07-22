@@ -184,16 +184,18 @@ export default function TrackerView({ currentOrder, onCancelOrder, showToast, se
           Order #{currentOrder.orderNumber || currentOrder.id}
         </p>
 
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-          <span className={`comic-border inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-black uppercase ${
-            cancelled ? 'bg-red-500 text-white' : delivered ? 'bg-green-500 text-white' : 'bg-white text-on-surface'
-          }`}>
-            <span className="material-symbols-outlined text-base">
-              {cancelled ? 'cancel' : delivered ? 'check_circle' : 'schedule'}
+        {(cancelled || delivered) && (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <span className={`comic-border inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-black uppercase ${
+              cancelled ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+            }`}>
+              <span className="material-symbols-outlined text-base">
+                {cancelled ? 'cancel' : 'check_circle'}
+              </span>
+              {cancelled ? 'Order cancelled' : 'Delivery complete'}
             </span>
-            {cancelled ? 'Order cancelled' : delivered ? 'Delivery complete' : `Next stage in ${timeFormatted}`}
-          </span>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Comic Timeline */}
