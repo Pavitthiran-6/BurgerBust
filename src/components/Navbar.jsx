@@ -16,7 +16,7 @@ export default function Navbar({
       <div className="flex justify-between items-center w-full px-4 md:px-12 py-stack-sm h-24">
         {/* Logo */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-          <span className="font-headline-lg text-2xl md:text-3xl font-black text-primary border-4 border-on-secondary-fixed px-5 py-1.5 rounded-full shadow-[4px_4px_0px_0px_rgba(28,27,27,1)] bg-primary-container hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
+          <span className="font-headline-lg text-2xl md:text-3xl font-extrabold text-[#745c00] tracking-tight drop-shadow-[2px_2px_0px_#1c1b1b] hover:scale-105 transition-transform">
             BurgerBurst
           </span>
           {restaurantStatus && (
