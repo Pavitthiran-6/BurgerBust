@@ -42,4 +42,26 @@ class BrevoEmailServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("BREVO_API_KEY");
     }
+
+    @Test
+    void normalizesCopiedEnvironmentValuesBeforeCallingBrevo() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        BrevoEmailService service = new BrevoEmailService(
+                builder,
+                "  \"secret-api-key\"  ",
+                "  https://api.brevo.test/  ",
+                "  'login@burgerburst.example'  ",
+                "  BurgerBurst  ");
+        server.expect(requestTo("https://api.brevo.test/v3/smtp/email"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("api-key", "secret-api-key"))
+                .andExpect(jsonPath("$.sender.email").value("login@burgerburst.example"))
+                .andExpect(jsonPath("$.sender.name").value("BurgerBurst"))
+                .andRespond(withSuccess("{\"messageId\":\"accepted\"}", MediaType.APPLICATION_JSON));
+
+        service.sendOtp("customer@example.com", "482901", Instant.parse("2026-07-21T10:05:00Z"));
+
+        server.verify();
+    }
 }

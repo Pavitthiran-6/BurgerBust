@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 @Slf4j
 @Service
@@ -38,10 +39,12 @@ public class BrevoEmailService implements EmailService {
         if (senderEmail == null || senderEmail.isBlank()) {
             throw new IllegalStateException("EMAIL_SENDER_EMAIL is required when EMAIL_PROVIDER=brevo");
         }
-        this.restClient = builder.baseUrl(baseUrl).build();
-        this.apiKey = apiKey;
-        this.senderEmail = senderEmail;
-        this.senderName = senderName == null || senderName.isBlank() ? "BurgerBurst" : senderName.strip();
+        this.restClient = builder.baseUrl(normalizeSetting(baseUrl)).build();
+        this.apiKey = normalizeSetting(apiKey);
+        this.senderEmail = normalizeSetting(senderEmail);
+        this.senderName = senderName == null || senderName.isBlank()
+                ? "BurgerBurst"
+                : normalizeSetting(senderName);
     }
 
     @Override
@@ -60,10 +63,40 @@ public class BrevoEmailService implements EmailService {
                     .retrieve()
                     .toBodilessEntity();
             log.info("OTP email accepted by Brevo recipient={} expiresAt={}", recipientEmail, expiresAt);
+        } catch (RestClientResponseException exception) {
+            log.error(
+                    "Brevo rejected OTP email recipient={} status={} response={}",
+                    recipientEmail,
+                    exception.getStatusCode().value(),
+                    sanitizeProviderResponse(exception.getResponseBodyAsString()));
+            throw new EmailDeliveryException("OTP email could not be delivered", exception);
         } catch (RestClientException exception) {
-            log.error("Brevo rejected OTP email recipient={}", recipientEmail);
+            log.error(
+                    "Brevo OTP request failed recipient={} cause={}",
+                    recipientEmail,
+                    exception.getClass().getSimpleName());
             throw new EmailDeliveryException("OTP email could not be delivered", exception);
         }
+    }
+
+    private static String normalizeSetting(String value) {
+        String normalized = value.strip();
+        if (normalized.length() >= 2) {
+            char first = normalized.charAt(0);
+            char last = normalized.charAt(normalized.length() - 1);
+            if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
+                normalized = normalized.substring(1, normalized.length() - 1).strip();
+            }
+        }
+        return normalized;
+    }
+
+    private static String sanitizeProviderResponse(String responseBody) {
+        if (responseBody == null || responseBody.isBlank()) {
+            return "<empty>";
+        }
+        String singleLine = responseBody.replaceAll("[\\r\\n\\t]+", " ").strip();
+        return singleLine.length() <= 500 ? singleLine : singleLine.substring(0, 500);
     }
 
     private String html(String otp, Instant expiresAt) {
