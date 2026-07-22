@@ -121,14 +121,7 @@ export default function Footer({ setCurrentPage }) {
                     Pokéball Rewards
                   </button>
                 </li>
-                <li>
-                  <button
-                    onClick={() => setCurrentPage && setCurrentPage('arcade')}
-                    className="hover:text-white hover:underline cursor-pointer text-left uppercase"
-                  >
-                    Cartoon Arcade
-                  </button>
-                </li>
+
                 <li>
                   <button
                     onClick={() => setCurrentPage && setCurrentPage('tracker')}
