@@ -15,19 +15,14 @@ export default function Navbar({
     <nav className="bg-surface border-b-4 border-on-secondary-fixed shadow-[4px_4px_0px_0px_rgba(28,27,27,1)] sticky top-0 z-50">
       <div className="flex justify-between items-center w-full px-4 md:px-12 py-stack-sm h-24">
         {/* Logo */}
-        <div className="flex items-center gap-4 cursor-pointer" onClick={() => setCurrentPage('home')}>
-          <img 
-            alt="BurgerBurst Logo" 
-            className="h-16 w-16 rounded-full border-4 border-on-secondary-fixed shadow-[4px_4px_0px_0px_rgba(28,27,27,1)]" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw4oArWR8qtfPmAuIKSdaPSJP7E56Z1d2K16t4f8toyIAU_vkGuKyIcqBQbEcrG0Gn2os8mCpHQ5IoJPXmWXvQ6GWSzdqzlYIXjzgOOB0VZD9zhieImcs3qfYeheIBXzsWH02prnk-aFkuZpEgHwo53bU7Vxg4CLmXMo0WItYHJxF3-84IKqFXRaAVQ30ejvbbddFdqJx5gPOAKaEOhnGpfyj1R7P5EwRyXcQHVrhYPm6lzjbYYXJ9ISJ98joLpOSt329W8DSsVw"
-          />
-          <span className="font-headline-lg text-headline-lg font-black text-primary border-4 border-on-secondary-fixed px-4 py-1 rounded-xl shadow-[4px_4px_0px_0px_rgba(28,27,27,1)] bg-primary-container">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
+          <span className="font-headline-lg text-2xl md:text-3xl font-black text-primary border-4 border-on-secondary-fixed px-5 py-1.5 rounded-full shadow-[4px_4px_0px_0px_rgba(28,27,27,1)] bg-primary-container hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
             BurgerBurst
           </span>
           {restaurantStatus && (
             <span
               title={restaurantStatus.error || restaurantStatus.message}
-              className={`${restaurantStatus.color} hidden lg:inline-flex text-white border-2 border-[#1a1c1c] rounded-full px-2 py-1 text-[9px] font-black uppercase`}
+              className={`${restaurantStatus.color} inline-flex text-white border-2 border-[#1a1c1c] rounded-full px-2.5 py-1 text-[9px] md:text-[10px] font-black uppercase shadow-[2px_2px_0px_0px_#111111]`}
             >
               {restaurantStatus.loading ? 'Checking…' : restaurantStatus.label}
             </span>
