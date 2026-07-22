@@ -205,35 +205,36 @@ export default function TrackerView({ currentOrder, onCancelOrder, showToast, se
           {STEPS.map((step, index) => {
             const completed = !cancelled && index < visualProgress;
             const active = !cancelled && index === visualProgress && visualProgress < STEPS.length;
+            const isBubbleVisible = active || (!cancelled && delivered && index === STEPS.length - 1);
 
             return (
               <div
                 key={step.label}
-                className="flex flex-col items-center relative h-full justify-start"
+                className="group flex flex-col items-center relative h-full justify-start cursor-pointer"
               >
-                {/* Speech Bubble for Active Step */}
-                {active ? (
-                  <div className="absolute -top-24 sm:-top-28 w-full flex justify-center animate-bounce z-30">
-                    <div className="speech-bubble w-36 sm:w-48 text-center font-label-bold text-[10px] sm:text-xs md:text-sm bg-white leading-tight">
-                      "{step.bubble}"
-                    </div>
-                  </div>
-                ) : (
-                  <div className="speech-bubble mb-6 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-24 w-32 sm:w-44 text-center font-label-bold text-[10px] sm:text-xs z-30 pointer-events-none leading-tight">
+                {/* Speech Bubble (Active/Delivered step visible by default; pops up on hover/touch for all steps) */}
+                <div
+                  className={`absolute -top-24 sm:-top-28 w-full flex justify-center z-30 transition-all duration-200 pointer-events-none ${
+                    isBubbleVisible
+                      ? 'opacity-100 scale-100 animate-bounce'
+                      : 'opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0'
+                  }`}
+                >
+                  <div className="speech-bubble w-36 sm:w-48 text-center font-label-bold text-[10px] sm:text-xs md:text-sm bg-white text-on-surface leading-tight comic-shadow">
                     "{step.bubble}"
                   </div>
-                )}
+                </div>
 
                 {/* Circle Icon Badge with Height Positioning */}
                 <div className="relative h-[150px] w-full flex items-center justify-center">
                   {active ? (
-                    <div className="w-20 h-20 sm:w-28 sm:h-28 bg-white rounded-full comic-border-thick comic-shadow-lg flex items-center justify-center relative z-10 animate-pulse border-primary transition-all duration-700">
+                    <div className="w-20 h-20 sm:w-28 sm:h-28 bg-white rounded-full comic-border-thick comic-shadow-lg flex items-center justify-center relative z-10 animate-pulse border-primary transition-all duration-700 group-hover:scale-105">
                       <span className="material-symbols-outlined text-3xl sm:text-5xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
                         {step.icon}
                       </span>
                     </div>
                   ) : completed ? (
-                    <div className="w-16 h-16 sm:w-22 sm:h-22 bg-primary-container rounded-full comic-border comic-shadow-lg flex items-center justify-center relative z-10 transition-all duration-700 ease-out hover:-translate-y-1">
+                    <div className="w-16 h-16 sm:w-22 sm:h-22 bg-primary-container rounded-full comic-border comic-shadow-lg flex items-center justify-center relative z-10 transition-all duration-700 ease-out group-hover:-translate-y-2 group-hover:scale-105">
                       <span className="material-symbols-outlined text-2xl sm:text-4xl text-on-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>
                         {step.icon}
                       </span>
@@ -244,7 +245,7 @@ export default function TrackerView({ currentOrder, onCancelOrder, showToast, se
                       </div>
                     </div>
                   ) : (
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-surface-variant rounded-full comic-border comic-shadow flex items-center justify-center relative z-10 -translate-y-6 opacity-75 grayscale transition-all duration-700 ease-out">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-surface-variant rounded-full comic-border comic-shadow flex items-center justify-center relative z-10 -translate-y-6 opacity-75 grayscale transition-all duration-700 ease-out group-hover:-translate-y-8 group-hover:scale-105">
                       <span className="material-symbols-outlined text-2xl sm:text-3xl text-on-surface-variant">
                         {step.icon}
                       </span>
@@ -254,7 +255,7 @@ export default function TrackerView({ currentOrder, onCancelOrder, showToast, se
 
                 {/* Title */}
                 <h3
-                  className={`font-headline-lg text-headline-lg text-center transition-all duration-500 -mt-2 ${
+                  className={`font-headline-lg text-headline-lg text-center transition-all duration-500 -mt-2 group-hover:text-primary ${
                     active
                       ? 'text-base sm:text-2xl text-primary font-black'
                       : completed
