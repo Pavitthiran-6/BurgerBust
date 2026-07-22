@@ -16,13 +16,13 @@ export default function Navbar({
       <div className="flex justify-between items-center w-full px-4 md:px-12 py-stack-sm h-24">
         {/* Logo */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-          <span className="font-headline-lg text-2xl md:text-3xl font-extrabold text-[#745c00] tracking-tight drop-shadow-[2px_2px_0px_#1c1b1b] hover:scale-105 transition-transform">
-            BurgerBurst
+          <span className="font-headline-xl text-3xl md:text-4xl lg:text-5xl font-black text-[#1c1b1b] uppercase tracking-tighter hover:scale-105 transition-transform">
+            BURGERBURST
           </span>
           {restaurantStatus && (
             <span
               title={restaurantStatus.error || restaurantStatus.message}
-              className={`${restaurantStatus.color} inline-flex text-white border-2 border-[#1a1c1c] rounded-full px-2.5 py-1 text-[9px] md:text-[10px] font-black uppercase shadow-[2px_2px_0px_0px_#111111]`}
+              className={`${restaurantStatus.color} inline-flex text-white border-2 border-[#1a1c1c] rounded-full px-2.5 py-1 text-[10px] md:text-xs font-black uppercase shadow-[2px_2px_0px_0px_#111111]`}
             >
               {restaurantStatus.loading ? 'Checking…' : restaurantStatus.label}
             </span>
