@@ -100,7 +100,7 @@ export default function CheckoutView({
           onClick={() => setCurrentPage('menu')}
           className="mt-4 px-8 py-4 bg-[#FF6B00] text-white border-4 border-[#1a1c1c] shadow-[6px_6px_0px_0px_#111111] font-headline-md font-black text-sm uppercase rounded-2xl hover:bg-[#e05e00] cursor-pointer"
         >
-          BROWSE BATTLE MENU ⚡
+          BROWSE BATTLE MENU
         </button>
       </div>
     );
@@ -115,13 +115,13 @@ export default function CheckoutView({
           : 'bg-gradient-to-r from-[#0B132B] via-[#1C2541] to-[#0B132B] text-white shadow-[10px_10px_0px_0px_#00F0FF]'
       }`}>
         <div className="absolute -left-6 -top-6 text-7xl opacity-20 pointer-events-none">🐉</div>
-        <div className="absolute -right-6 -bottom-6 text-7xl opacity-20 pointer-events-none">⚡</div>
+        <div className="absolute -right-6 -bottom-6 text-7xl opacity-20 pointer-events-none">🐉</div>
 
         <div className="flex justify-center mb-3">
           <span className={`border-2 border-black px-4 py-1 rounded-full text-xs font-headline-md font-black uppercase tracking-wider shadow-[3px_3px_0px_0px_#111111] ${
             step === 1 ? 'bg-white text-[#FF6B00]' : 'bg-[#00F0FF] text-[#1a1c1c]'
           }`}>
-            {step === 1 ? 'STEP 1 OF 2: SAIYAN CAPSULE BASE RADAR 📍' : 'STEP 2 OF 2: KI POWER WALLET & SHENRON DISPATCH ⚡'}
+            {step === 1 ? 'STEP 1 OF 2: SAIYAN CAPSULE BASE RADAR' : 'STEP 2 OF 2: KI POWER WALLET & SHENRON DISPATCH'}
           </span>
         </div>
 
@@ -142,7 +142,7 @@ export default function CheckoutView({
           <div className="lg:col-span-7 bg-white border-4 border-[#1a1c1c] shadow-[10px_10px_0px_0px_#FF6B00] p-6 md:p-8 rounded-[2.5rem] space-y-6">
             <div className="flex justify-between items-center pb-4 border-b-4 border-[#1a1c1c]">
               <h3 className="font-headline-lg text-xl md:text-2xl font-black uppercase flex items-center gap-2 text-[#1a1c1c]">
-                <span>📍</span> SAVED CAPSULE BASES
+                SAVED CAPSULE BASES
               </h3>
               <button
                 type="button"
@@ -197,7 +197,7 @@ export default function CheckoutView({
                     </div>
                     {addr.default && (
                       <span className="bg-[#10B981] text-white text-[9px] font-headline-md font-black px-2.5 py-1 rounded-full uppercase border-2 border-black shadow-[2px_2px_0px_0px_#000]">
-                        PRIMARY ⭐️
+                        PRIMARY
                       </span>
                     )}
                   </label>
@@ -211,7 +211,7 @@ export default function CheckoutView({
             {/* Directives Card */}
             <div className="bg-[#FFF8E7] border-4 border-[#1a1c1c] shadow-[10px_10px_0px_0px_#111111] p-6 md:p-8 rounded-[2.5rem] space-y-4">
               <h3 className="font-headline-lg text-lg font-black uppercase flex items-center gap-2 text-[#1a1c1c]">
-                <span>⚡</span> DISPATCH DIRECTIVES
+                DISPATCH DIRECTIVES
               </h3>
               <div className="space-y-3">
                 {['Leave at the door', 'Do not ring the bell', 'Call when you arrive'].map((note, i) => (
@@ -252,7 +252,7 @@ export default function CheckoutView({
               onClick={handleContinueToPayment}
               className="w-full py-5 bg-[#FF6B00] text-white border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] font-headline-xl font-black text-base uppercase rounded-[2.5rem] cursor-pointer hover:bg-[#e05e00] transition-all flex items-center justify-center gap-2"
             >
-              CONTINUE TO KI POWER WALLET ⚡
+              CONTINUE TO KI POWER WALLET
             </button>
           </div>
         </div>
@@ -267,10 +267,10 @@ export default function CheckoutView({
             <div className="bg-white border-4 border-[#1a1c1c] shadow-[10px_10px_0px_0px_#00F0FF] p-6 md:p-8 rounded-[2.5rem] space-y-4">
               <div className="flex justify-between items-center pb-3 border-b-4 border-[#1a1c1c]">
                 <h3 className="font-headline-lg text-xl font-black uppercase flex items-center gap-2 text-[#1a1c1c]">
-                  <span>⚡</span> SELECT KI PAYMENT MANIFEST
+                  SELECT KI PAYMENT MANIFEST
                 </h3>
                 <span className="bg-[#00F0FF] text-[#1a1c1c] px-3 py-1 rounded-full text-[10px] font-headline-md font-black border border-black">
-                  ENCRYPTED 🔐
+                  ENCRYPTED
                 </span>
               </div>
 
@@ -298,7 +298,7 @@ export default function CheckoutView({
                     </div>
                     {pm.primary && (
                       <span className="bg-[#00F0FF] text-[#1a1c1c] text-[9px] font-headline-md font-black px-2.5 py-1 rounded-full uppercase border border-black shadow-[2px_2px_0px_0px_#000]">
-                        DEFAULT ⚡
+                        DEFAULT
                       </span>
                     )}
                   </label>
@@ -309,7 +309,7 @@ export default function CheckoutView({
             {/* Bento Card 2: Ki Points Reservoir */}
             <div className="bg-[#FFF8E7] border-4 border-[#1a1c1c] shadow-[10px_10px_0px_0px_#FFD23F] p-6 rounded-[2.5rem] space-y-3">
               <label className="block font-headline-lg text-sm font-black uppercase text-[#1a1c1c]">
-                REDEEM SAIYAN KI POINTS ({rewardPoints} AVAILABLE 🔮)
+                REDEEM SAIYAN KI POINTS ({rewardPoints} AVAILABLE)
               </label>
               <input
                 type="number"
@@ -367,7 +367,7 @@ export default function CheckoutView({
               >
                 {isPlacingOrder
                   ? (paymentIsOnline ? 'CHARGING RAZORPAY KAMEHAMEHA...' : 'PLACING SAIYAN ORDER...')
-                  : `${paymentIsOnline ? 'PROCEED TO ONLINE PAYMENT ⚡' : 'SUMMON CASH ORDER 🐉'} • ${money(total)}`}
+                  : `${paymentIsOnline ? 'PROCEED TO ONLINE PAYMENT 🐉' : 'SUMMON CASH ORDER 🐉'} • ${money(total)}`}
               </button>
 
               <button
