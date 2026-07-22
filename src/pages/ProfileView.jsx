@@ -133,7 +133,7 @@ export default function ProfileView({
     { key: 'ORDERS', label: 'ORDERS', icon: 'local_shipping' },
     { key: 'FAVORITES', label: 'FAVORITES', icon: 'favorite' },
     { key: 'REWARDS', label: 'REWARDS', icon: 'military_tech' },
-    { key: 'ADDRESSES', label: 'BASES', icon: 'map' },
+    { key: 'ADDRESSES', label: 'ADDRESSES', icon: 'map' },
     { key: 'PAYMENTS', label: 'WALLET', icon: 'credit_card' },
     { key: 'NOTIFICATIONS', label: 'NOTIFICATIONS', icon: 'notifications' },
     { key: 'SETTINGS', label: 'SETTINGS', icon: 'settings' },
@@ -253,6 +253,22 @@ export default function ProfileView({
         {/* Account Meta Info */}
         {activeTab === 'PROFILE' && (
           <div className="mt-8 space-y-5 max-w-2xl">
+            <div className="bg-[#00F0FF] border-3 border-[#1a1c1c] p-4 rounded-2xl shadow-[4px_4px_0px_0px_#111111] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h4 className="font-black text-sm uppercase">DELIVERY ADDRESSES ({addresses.length})</h4>
+                <p className="text-[11px] font-bold text-gray-800">
+                  {addresses.length === 0 ? 'Add an address before starting checkout.' : 'Review or add addresses used during checkout.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCurrentPage('address')}
+                className="px-5 py-3 bg-[#FFD23F] text-[#1a1c1c] border-3 border-[#1a1c1c] font-black text-xs uppercase rounded-xl shadow-[3px_3px_0px_0px_#111111] cursor-pointer shrink-0"
+              >
+                + ADD DELIVERY ADDRESS
+              </button>
+            </div>
+
             {/* Account Info */}
             <div className="bg-[#FFF8E7] border-3 border-[#1a1c1c] p-4 rounded-2xl">
               <h4 className="font-black text-xs uppercase mb-3"> ACCOUNT INFORMATION</h4>
@@ -462,10 +478,15 @@ export default function ProfileView({
                 onClick={() => setCurrentPage('address')}
                 className="px-4 py-2 bg-[#FFD23F] text-[#1a1c1c] border-2 border-[#1a1c1c] font-black text-xs uppercase rounded-xl"
               >
-                MANAGE MAP BASES 
+                {addresses.length === 0 ? '+ ADD DELIVERY ADDRESS' : 'MANAGE ADDRESSES'}
               </button>
             </div>
             <div className="space-y-2 text-xs font-bold">
+              {addresses.length === 0 && (
+                <div className="border-2 border-dashed border-[#1a1c1c] p-5 rounded-xl bg-[#FFF8E7] text-center">
+                  No delivery address saved yet.
+                </div>
+              )}
               {addresses.map(a => (
                 <div key={a.id} className="border-2 border-[#1a1c1c] p-3 rounded-xl bg-[#fcfbf7] flex justify-between items-center">
                   <span>{a.title}: {a.address}</span>

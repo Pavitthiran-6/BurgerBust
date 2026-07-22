@@ -36,6 +36,17 @@ import { Analytics } from './hooks/useAnalytics';
 const AdminApp = lazy(() => import('./admin/AdminApp'));
 const ComicPageTransition = lazy(() => import('./components/ComicPageTransition'));
 const SPLASH_VISIT_KEY = 'has_visited_burgerburst_v2';
+const LEGACY_DEMO_ADDRESS = 'Treehouse #1, Candy Kingdom Road';
+
+function loadSavedAddresses() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('burger_addresses') || '[]');
+    if (!Array.isArray(saved)) return [];
+    return saved.filter(address => address?.address !== LEGACY_DEMO_ADDRESS);
+  } catch {
+    return [];
+  }
+}
 
 function loadRazorpayCheckout() {
   if (window.Razorpay) return Promise.resolve();
@@ -59,26 +70,32 @@ function loadRazorpayCheckout() {
 function AppContent() {
   const { currentUser, isLoggedIn, logout } = useAuth();
 
-  const getPageFromPath = () => {
-    const path = window.location.pathname.replace(/^\/+/, '');
-    if (!path || path === 'home') return 'home';
-    return path;
+  const getRouteFromPath = () => {
+    const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+    if (!path || path === 'home') return { page: 'home', itemId: null };
+    const [section, itemId] = path.split('/');
+    if (section === 'products' && itemId) {
+      return { page: 'food-detail', itemId: decodeURIComponent(itemId) };
+    }
+    return { page: path, itemId: null };
   };
+
+  const initialRoute = getRouteFromPath();
 
   const profile = currentUser ? {
     name: currentUser.name,
     email: currentUser.email,
-    phone: "555-0199",
+    phone: currentUser.phone || '',
     avatar: null
   } : {
     name: "Hungry Hero",
     email: "hero@burgerburst.com",
-    phone: "555-0199",
+    phone: "",
     avatar: null
   };
 
   // 2. Navigation State
-  const [currentPage, setCurrentPageState] = useState(() => getPageFromPath());
+  const [currentPage, setCurrentPageState] = useState(() => initialRoute.page);
 
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,7 +104,7 @@ function AppContent() {
   const [menuPagination, setMenuPagination] = useState({ page: 0, last: true });
   const [menuLoading, setMenuLoading] = useState(true);
   const [menuError, setMenuError] = useState(null);
-  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [selectedItemId, setSelectedItemId] = useState(() => initialRoute.itemId);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -163,7 +180,7 @@ function AppContent() {
   };
 
   // Protected Page Guard & Navigator
-  const setCurrentPage = (page) => {
+  const setCurrentPage = (page, detailItemId = null) => {
     const protectedPages = ['favorites', 'checkout', 'rewards', 'profile', 'orders', 'address', 'addresses', 'payment', 'payments', 'tracker'];
 
     if (page === 'login') {
@@ -177,7 +194,9 @@ function AppContent() {
       return;
     }
 
-    if (page === 'menu') {
+    if (page === 'food-detail' && detailItemId) {
+      setSelectedItemId(detailItemId);
+    } else if (page === 'menu') {
       setSelectedItemId(null);
     }
 
@@ -185,7 +204,12 @@ function AppContent() {
       triggerComicTransition();
     }
     setCurrentPageState(page);
-    const targetPath = page === 'home' ? '/' : `/${page}`;
+    const productId = detailItemId || selectedItemId;
+    const targetPath = page === 'home'
+      ? '/'
+      : page === 'food-detail' && productId
+        ? `/products/${encodeURIComponent(productId)}`
+        : `/${page}`;
     if (window.location.pathname !== targetPath) {
       window.history.pushState(null, '', targetPath);
     }
@@ -195,12 +219,14 @@ function AppContent() {
   // Listen for browser Back/Forward arrows
   useEffect(() => {
     const handlePopState = () => {
-      const page = getPageFromPath();
-      if (page === 'menu') {
+      const route = getRouteFromPath();
+      if (route.page === 'food-detail') {
+        setSelectedItemId(route.itemId);
+      } else if (route.page === 'menu') {
         setSelectedItemId(null);
       }
       triggerComicTransition();
-      setCurrentPageState(page);
+      setCurrentPageState(route.page);
       window.scrollTo(0, 0);
     };
 
@@ -222,11 +248,7 @@ function AppContent() {
   const [commerceLoading, setCommerceLoading] = useState(false);
   const [commerceError, setCommerceError] = useState(null);
 
-  const [addresses, setAddresses] = useState(() => {
-    return JSON.parse(localStorage.getItem('burger_addresses')) || [
-      { id: 1, title: "TREEHOUSE HQ", address: "Treehouse #1, Candy Kingdom Road", coords: "12.981 N, 77.592 E", tag: "HOME BASE", default: true }
-    ];
-  });
+  const [addresses, setAddresses] = useState(loadSavedAddresses);
 
   const [paymentMethods, setPaymentMethods] = useState(() => {
     return JSON.parse(localStorage.getItem('burger_payment_methods')) || [
@@ -424,14 +446,14 @@ function AppContent() {
     setIsPlacingOrder(true);
     const razorpay = !selectedPayment?.type?.toUpperCase().includes('CASH');
     const address = {
-      recipientName: profile.name || 'BurgerBurst Customer',
-      phone: profile.phone || '555-0199',
-      addressLine1: deliveryAddress?.address || deliveryAddress?.addressLine1 || 'Saved delivery address',
+      recipientName: deliveryAddress?.recipientName || profile.name || 'BurgerBurst Customer',
+      phone: deliveryAddress?.phone || profile.phone,
+      addressLine1: deliveryAddress?.addressLine1 || deliveryAddress?.address,
       addressLine2: deliveryAddress?.addressLine2 || null,
-      city: deliveryAddress?.city || 'BurgerBurst City',
-      state: deliveryAddress?.state || 'BurgerBurst State',
-      postalCode: deliveryAddress?.postalCode || '000000',
-      deliveryInstructions: deliveryAddress?.deliveryInstructions || 'Deliver to the saved address',
+      city: deliveryAddress?.city,
+      state: deliveryAddress?.state,
+      postalCode: deliveryAddress?.postalCode || deliveryAddress?.pincode,
+      deliveryInstructions: deliveryAddress?.deliveryInstructions || deliveryAddress?.deliveryNotes || null,
     };
     try {
       Analytics.checkoutStarted(cartSummary.total, cartSummary.itemCount);
@@ -594,10 +616,10 @@ function AppContent() {
             case 'home':
               return (
                 <HomeView
+                  menuItems={menuItems}
                   setCurrentPage={setCurrentPage}
                   setActiveCategory={setActiveCategory}
                   onNavigateMenu={() => setCurrentPage('menu')}
-                  onAddToCart={handleApiAddToCart}
                   onAddDirectItem={(itemId) => handleApiAddToCart(itemId, {}, 1)}
                   onToggleFavorite={handleToggleFavorite}
                   favorites={favorites}
@@ -605,12 +627,10 @@ function AppContent() {
                     const legacyDetail = itemId === 'burger-classic'
                       ? menuItems.find(item => item.name === 'The Classic Toon')?.id
                       : itemId;
-                    setSelectedItemId(legacyDetail || itemId);
-                    setCurrentPage('food-detail');
+                    setCurrentPage('food-detail', legacyDetail || itemId);
                   }}
                   isLoggedIn={isLoggedIn}
                   user={profile}
-                  recentOrders={orders.slice(0, 3)}
                   rewardPoints={rewardPoints}
                 />
               );
@@ -634,8 +654,7 @@ function AppContent() {
                   selectedItemId={selectedItemId}
                   setSelectedItemId={setSelectedItemId}
                   onViewDetail={(itemId) => {
-                    setSelectedItemId(itemId);
-                    setCurrentPage('food-detail');
+                    setCurrentPage('food-detail', itemId);
                   }}
                 />
               );
@@ -693,8 +712,7 @@ function AppContent() {
                   onToggleFavorite={handleToggleFavorite}
                   onAddToCart={handleApiAddToCart}
                   onViewDetail={(itemId) => {
-                    setSelectedItemId(itemId);
-                    setCurrentPage('food-detail');
+                    setCurrentPage('food-detail', itemId);
                   }}
                 />
               );
@@ -718,6 +736,7 @@ function AppContent() {
                   addresses={addresses}
                   setAddresses={setAddresses}
                   showToast={showToast}
+                  profile={profile}
                 />
               );
 
@@ -739,8 +758,7 @@ function AppContent() {
                   onToggleFavorite={handleToggleFavorite}
                   onAddToCart={handleApiAddToCart}
                   onViewDetail={(itemId) => {
-                    setSelectedItemId(itemId);
-                    setCurrentPage('food-detail');
+                    setCurrentPage('food-detail', itemId);
                   }}
                   onBrowseMenu={() => setCurrentPage('menu')}
                 />
@@ -777,8 +795,7 @@ function AppContent() {
                   favorites={favorites}
                   onToggleFavorite={handleToggleFavorite}
                   showToast={showToast}
-                  setCurrentPage={setCurrentPage}
-                  setSelectedItemId={setSelectedItemId}
+                  onViewDetail={(itemId) => setCurrentPage('food-detail', itemId)}
                 />
               );
 

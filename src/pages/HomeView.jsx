@@ -2,14 +2,13 @@ import React from 'react';
 
 
 export default function HomeView({
+  menuItems = [],
   setCurrentPage,
   setActiveCategory,
   onAddDirectItem,
-  onAddToCart,
   onViewDetail,
   isLoggedIn,
   user,
-  recentOrders = [],
   rewardPoints = 450
 }) {
   const handleGoToMenu = (category = 'All') => {
@@ -17,18 +16,35 @@ export default function HomeView({
     setCurrentPage('menu');
   };
 
-  const handleOpenBossDetail = () => {
-    if (onViewDetail) {
-      onViewDetail('burger-classic');
-    } else {
-      handleGoToMenu('Burger');
-    }
+  const findProduct = (...names) => {
+    const normalizedNames = names.map(name => name.toLowerCase());
+    return menuItems.find(item => normalizedNames.includes(item.name.toLowerCase()));
   };
 
-  const handleAddHubItem = (itemKey, itemName) => {
-    if (onAddDirectItem) {
-      onAddDirectItem(itemKey);
+  const handleOpenProduct = (productName, fallbackCategory = 'All') => {
+    const item = findProduct(productName);
+    if (item && onViewDetail) {
+      onViewDetail(item.id);
+      return;
     }
+    handleGoToMenu(fallbackCategory);
+  };
+
+  const handleAddProduct = (productName, fallbackCategory = 'All') => {
+    const item = findProduct(productName);
+    if (item && onAddDirectItem) {
+      onAddDirectItem(item.id);
+      return;
+    }
+    handleGoToMenu(fallbackCategory);
+  };
+
+  const handleOpenBossDetail = () => {
+    handleOpenProduct('The Classic Toon', 'Burger');
+  };
+
+  const handleAddHubItem = (productName, fallbackCategory) => {
+    handleAddProduct(productName, fallbackCategory);
   };
 
   return (
@@ -86,7 +102,7 @@ export default function HomeView({
 
         {/* Right Small Card (Sidekick Fries) */}
         <div 
-          onClick={() => handleGoToMenu('Fries')}
+          onClick={() => handleOpenProduct('Happy Fries', 'Fries')}
           className="lg:col-span-4 bg-white comic-border rounded-3xl p-6 relative overflow-hidden shadow-[8px_8px_0px_0px_rgba(17,17,17,1)] flex flex-col items-center justify-center transform rotate-1 cursor-pointer group hover:-translate-y-1 transition-transform"
         >
           <h2 className="font-headline-lg text-3xl mb-4 text-center">SIDEKICK FRIES</h2>
@@ -112,7 +128,7 @@ export default function HomeView({
             <p className="text-2xl font-bold mb-8">NUGGETS + SODA = UNSTOPPABLE COMBO</p>
             <div className="flex gap-4">
               <button 
-                onClick={() => handleGoToMenu('Chicken')}
+                onClick={() => handleOpenProduct('Burger Boss Combo', 'Combos')}
                 className="bg-white text-black font-black text-3xl p-4 comic-border rounded-2xl shadow-[4px_4px_0px_0px_rgba(255,210,63,1)] hover:-translate-y-1 transition-transform cursor-pointer"
               >
                 ONLY $12.99
@@ -131,7 +147,7 @@ export default function HomeView({
               src="/foods/home/soft-drink.png"
             />
             <div 
-              onClick={() => handleGoToMenu('Beverage')}
+              onClick={() => handleOpenProduct('Burger Boss Combo', 'Combos')}
               className="absolute -top-10 -right-10 bg-[#FFD23F] w-32 h-32 rounded-full comic-border flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(255,255,255,1)] cursor-pointer"
             >
               <span className="font-black text-2xl text-black">POP!</span>
@@ -146,7 +162,7 @@ export default function HomeView({
           <div className="bg-black text-white px-12 py-4 mb-8">
             <h2 className="text-6xl font-black tracking-widest italic text-center">WANTED</h2>
           </div>
-          <div className="comic-border bg-white p-4 mb-6 shadow-[8px_8px_0px_0px_rgba(17,17,17,1)] cursor-pointer" onClick={() => handleGoToMenu('Pizza')}>
+          <div className="comic-border bg-white p-4 mb-6 shadow-[8px_8px_0px_0px_rgba(17,17,17,1)] cursor-pointer" onClick={() => handleOpenProduct('Cheesy Pal Pizza', 'Pizza')}>
             <img 
               alt="Cheesy Pal Pizza" 
               className="w-80 h-80 object-contain hover:scale-105 transition-transform duration-300" 
@@ -156,7 +172,7 @@ export default function HomeView({
           <h3 className="font-headline-lg text-4xl mb-4">"CHEESY PAL"</h3>
           <p className="text-2xl font-black border-t-4 border-black pt-4 w-full text-center mb-8">REWARD: STRETCHY SATISFACTION</p>
           <div 
-            onClick={() => handleGoToMenu('Pizza')}
+            onClick={() => handleOpenProduct('Cheesy Pal Pizza', 'Pizza')}
             className="absolute -bottom-8 -right-8 bg-[#FFD23F] comic-border w-32 h-32 rounded-full flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(17,17,17,1)] transform rotate-12 cursor-pointer hover:scale-105 transition-transform"
           >
             <span className="font-black text-xl text-center">CHEESY!<br/>$3.50</span>
@@ -173,7 +189,7 @@ export default function HomeView({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Wings */}
           <div 
-            onClick={() => handleGoToMenu('Chicken')}
+            onClick={() => handleOpenProduct('Inferno Hero Wings', 'Fried Chicken')}
             className="bg-white comic-border p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(17,17,17,1)] group hover:-translate-y-2 transition-transform cursor-pointer"
           >
             <div className="h-64 flex items-center justify-center relative">
@@ -192,7 +208,7 @@ export default function HomeView({
           
           {/* Tacos */}
           <div 
-            onClick={() => handleGoToMenu('Pasta')}
+            onClick={() => handleOpenProduct('Midnight Tacos', 'Wraps')}
             className="bg-[#FFD23F] comic-border p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(17,17,17,1)] group hover:-translate-y-2 transition-transform cursor-pointer"
           >
             <div className="h-64 flex items-center justify-center relative">
@@ -211,7 +227,7 @@ export default function HomeView({
 
           {/* Chicken */}
           <div 
-            onClick={() => handleGoToMenu('Chicken')}
+            onClick={() => handleOpenProduct('Dragon Fried Chicken', 'Fried Chicken')}
             className="bg-white comic-border p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(17,17,17,1)] group hover:-translate-y-2 transition-transform cursor-pointer"
           >
             <div className="h-64 flex items-center justify-center relative">
@@ -255,7 +271,7 @@ export default function HomeView({
           </div>
           <div className="flex-1 flex gap-8 justify-center relative mt-6 lg:mt-0">
             <div 
-              onClick={() => handleGoToMenu('Bakery')}
+              onClick={() => handleOpenProduct('Pink Power Donut', 'Desserts')}
               className="bg-white comic-border p-6 rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(17,17,17,1)] transform -rotate-6 cursor-pointer hover:scale-105 transition-transform"
             >
               <img 
@@ -266,7 +282,7 @@ export default function HomeView({
               <div className="bg-[#FFD23F] comic-border absolute -top-4 -left-4 px-4 py-2 rounded-xl font-black text-xs">DONUT</div>
             </div>
             <div 
-              onClick={() => handleGoToMenu('Bakery')}
+              onClick={() => handleOpenProduct('Fudge Brownie Stack', 'Desserts')}
               className="bg-white comic-border p-6 rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(17,17,17,1)] transform rotate-6 mt-12 cursor-pointer hover:scale-105 transition-transform"
             >
               <img 
@@ -289,7 +305,7 @@ export default function HomeView({
             <img 
               alt="Pasta" 
               className="w-full h-44 object-contain mb-4 cursor-pointer" 
-              onClick={() => handleGoToMenu('Pasta')}
+              onClick={() => handleOpenProduct('Toon-tastic Pasta', 'Pasta')}
               src="/foods/pasta-tomato.png"
             />
             <div>
@@ -297,7 +313,8 @@ export default function HomeView({
               <div className="flex justify-between items-center mt-4">
                 <span className="text-xl font-black text-primary">$11.00</span>
                 <button 
-                  onClick={() => handleAddHubItem('pasta-italo', 'Italo-Toon Pasta')}
+                  onClick={() => handleAddHubItem('Toon-tastic Pasta', 'Pasta')}
+                  aria-label="Add Toon-tastic Pasta"
                   className="bg-black text-white p-2 rounded-full comic-border cursor-pointer hover:bg-primary hover:text-black transition-colors"
                 >
                   <span className="material-symbols-outlined font-bold flex items-center justify-center">add</span>
@@ -311,7 +328,7 @@ export default function HomeView({
             <img 
               alt="Chicken Wrap" 
               className="w-full h-44 object-contain mb-4 cursor-pointer" 
-              onClick={() => handleGoToMenu('Chicken')}
+              onClick={() => handleOpenProduct('Hero Chicken Wrap', 'Wraps')}
               src="/foods/home/chicken-wrap.png"
             />
             <div>
@@ -319,7 +336,8 @@ export default function HomeView({
               <div className="flex justify-between items-center mt-4">
                 <span className="text-xl font-black text-primary">$8.50</span>
                 <button 
-                  onClick={() => handleAddHubItem('wrap-hero', 'Hero Wrap')}
+                  onClick={() => handleAddHubItem('Hero Chicken Wrap', 'Wraps')}
+                  aria-label="Add Hero Chicken Wrap"
                   className="bg-black text-white p-2 rounded-full comic-border cursor-pointer hover:bg-primary hover:text-black transition-colors"
                 >
                   <span className="material-symbols-outlined font-bold flex items-center justify-center">add</span>
@@ -333,7 +351,7 @@ export default function HomeView({
             <img 
               alt="Shawarma" 
               className="w-full h-44 object-contain mb-4 cursor-pointer" 
-              onClick={() => handleGoToMenu('Chicken')}
+              onClick={() => handleOpenProduct('Shawarma Scroll', 'Wraps')}
               src="/foods/home/shawarma.png"
             />
             <div>
@@ -341,7 +359,8 @@ export default function HomeView({
               <div className="flex justify-between items-center mt-4">
                 <span className="text-xl font-black text-primary">$9.00</span>
                 <button 
-                  onClick={() => handleAddHubItem('shawarma-zap', 'Zap Shawarma')}
+                  onClick={() => handleAddHubItem('Shawarma Scroll', 'Wraps')}
+                  aria-label="Add Shawarma Scroll"
                   className="bg-black text-white p-2 rounded-full comic-border cursor-pointer hover:bg-primary hover:text-black transition-colors"
                 >
                   <span className="material-symbols-outlined font-bold flex items-center justify-center">add</span>
@@ -355,7 +374,7 @@ export default function HomeView({
             <img 
               alt="Hot Dog" 
               className="w-full h-44 object-contain mb-4 cursor-pointer" 
-              onClick={() => handleGoToMenu('Chicken')}
+              onClick={() => handleOpenProduct('Boom Hot Dog', 'Wraps')}
               src="/foods/home/hot-dog.png"
             />
             <div>
@@ -363,7 +382,8 @@ export default function HomeView({
               <div className="flex justify-between items-center mt-4">
                 <span className="text-xl font-black text-primary">$6.00</span>
                 <button 
-                  onClick={() => handleAddHubItem('hotdog-boom', 'Boom Dog')}
+                  onClick={() => handleAddHubItem('Boom Hot Dog', 'Wraps')}
+                  aria-label="Add Boom Hot Dog"
                   className="bg-black text-white p-2 rounded-full comic-border cursor-pointer hover:bg-primary hover:text-black transition-colors"
                 >
                   <span className="material-symbols-outlined font-bold flex items-center justify-center">add</span>
@@ -390,13 +410,13 @@ export default function HomeView({
               <img 
                 alt="Cheesy Chibi Burger" 
                 className="w-1/2 h-full object-contain drop-shadow-[5px_5px_0px_rgba(0,0,0,0.1)] group-hover:scale-110 transition-transform cursor-pointer" 
-                onClick={() => handleGoToMenu('Burger')}
+                onClick={() => handleOpenProduct('Cheesy Chibi Burger', 'Burger')}
                 src="/foods/burger-chibi.png"
               />
               <img 
                 alt="Mozzarella Sticks" 
                 className="w-1/2 h-full object-contain drop-shadow-[5px_5px_0px_rgba(0,0,0,0.1)] group-hover:scale-110 transition-transform cursor-pointer" 
-                onClick={() => handleGoToMenu('Sides')}
+                onClick={() => handleOpenProduct('Stretchy Mozzarella Sticks', 'Sides')}
                 src="/foods/home/mozzarella-sticks.png"
               />
             </div>
@@ -421,19 +441,19 @@ export default function HomeView({
               <img 
                 alt="Chicken Sandwich" 
                 className="w-1/3 h-full object-contain drop-shadow-[5px_5px_0px_rgba(0,0,0,0.1)] group-hover:scale-110 transition-transform cursor-pointer" 
-                onClick={() => handleGoToMenu('Chicken')}
+                onClick={() => handleOpenProduct('Crispy Hero Sandwich', 'Burger')}
                 src="/foods/home/chicken-sandwich.png"
               />
               <img 
                 alt="Golden Onion Rings" 
                 className="w-1/3 h-full object-contain drop-shadow-[5px_5px_0px_rgba(0,0,0,0.1)] group-hover:scale-110 transition-transform cursor-pointer" 
-                onClick={() => handleGoToMenu('Sides')}
+                onClick={() => handleOpenProduct('Golden Onion Rings', 'Sides')}
                 src="/foods/home/onion-rings.png"
               />
               <img 
                 alt="Mystic Iced Coffee" 
                 className="w-1/3 h-full object-contain drop-shadow-[5px_5px_0px_rgba(0,0,0,0.1)] group-hover:scale-110 transition-transform cursor-pointer" 
-                onClick={() => handleGoToMenu('Drinks')}
+                onClick={() => handleOpenProduct('Mystic Iced Coffee', 'Drinks')}
                 src="/foods/home/iced-coffee.png"
               />
             </div>
@@ -465,7 +485,7 @@ export default function HomeView({
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10 w-full">
           {/* Shakes Pair Showcase */}
           <div className="flex gap-6 items-end justify-center w-full lg:w-auto">
-            <div className="text-center group cursor-pointer" onClick={() => handleGoToMenu('Beverage')}>
+            <div className="text-center group cursor-pointer" onClick={() => handleOpenProduct('Strawberry Power Shake', 'Drinks')}>
               <img 
                 alt="Strawberry Shake" 
                 className="w-32 h-44 md:w-44 md:h-60 object-contain group-hover:-translate-y-3 transition-transform duration-300 drop-shadow-[5px_5px_0px_rgba(0,0,0,0.2)]" 
@@ -476,7 +496,7 @@ export default function HomeView({
               </div>
             </div>
 
-            <div className="text-center group cursor-pointer" onClick={() => handleGoToMenu('Beverage')}>
+            <div className="text-center group cursor-pointer" onClick={() => handleOpenProduct('Sunny Shake', 'Drinks')}>
               <img 
                 alt="Vanilla Shake" 
                 className="w-32 h-44 md:w-44 md:h-60 object-contain group-hover:-translate-y-3 transition-transform duration-300 drop-shadow-[5px_5px_0px_rgba(0,0,0,0.2)]" 
@@ -489,7 +509,7 @@ export default function HomeView({
           </div>
 
           {/* Centerpiece Featured Food: Monster Pepperoni Pizza Box */}
-          <div className="flex flex-col items-center bg-[#FF0055] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 text-white text-center transform rotate-[-2deg] hover:rotate-0 transition-transform duration-300 max-w-xs w-full cursor-pointer my-4 lg:my-0" onClick={() => handleGoToMenu('Pizza')}>
+          <div className="flex flex-col items-center bg-[#FF0055] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 text-white text-center transform rotate-[-2deg] hover:rotate-0 transition-transform duration-300 max-w-xs w-full cursor-pointer my-4 lg:my-0" onClick={() => handleOpenProduct('Happy Pepperoni Pizza', 'Pizza')}>
             <span className="bg-[#FFD23F] text-[#1a1c1c] border-2 border-[#1a1c1c] px-3 py-1 rounded-full text-xs font-black uppercase mb-3 shadow-[2px_2px_0px_0px_#111111]">
               HOT CHEESY SLICE 
             </span>
@@ -504,7 +524,7 @@ export default function HomeView({
             <span className="text-xs font-bold text-yellow-200 mb-3 block">STRETCHY CHEESE OVERLOAD</span>
             <button 
               type="button"
-              onClick={(e) => { e.stopPropagation(); onAddDirectItem && onAddDirectItem('pizza-pepperoni'); }}
+              onClick={(e) => { e.stopPropagation(); handleAddProduct('Happy Pepperoni Pizza', 'Pizza'); }}
               className="bg-white text-[#1a1c1c] border-3 border-[#1a1c1c] shadow-[3px_3px_0px_0px_#FFD23F] px-5 py-2.5 rounded-xl font-black text-xs uppercase hover:bg-yellow-100 cursor-pointer"
             >
               GRAB SLICE • $5.99
@@ -523,7 +543,7 @@ export default function HomeView({
               <img 
                 alt="Strawberry Waffle Sundae" 
                 className="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-[4px_4px_0px_rgba(0,0,0,0.1)] cursor-pointer hover:scale-105 transition-transform" 
-                onClick={() => handleGoToMenu('Desserts')}
+                onClick={() => handleOpenProduct('Strawberry Waffle Sundae', 'Desserts')}
                 src="/foods/home/waffle-sundae.png"
               />
               <div>
@@ -532,7 +552,7 @@ export default function HomeView({
               </div>
             </div>
             <button 
-              onClick={() => onAddDirectItem && onAddDirectItem('waffle-sundae')}
+              onClick={() => handleAddProduct('Strawberry Waffle Sundae', 'Desserts')}
               className="w-full mt-5 bg-[#FFD23F] text-[#1a1c1c] comic-border py-3.5 font-black text-lg shadow-[4px_4px_0px_0px_rgba(17,17,17,1)] active:shadow-none active:translate-y-1 transition-all rounded-2xl cursor-pointer"
             >
               BOOST MY MEAL! • $6.99
@@ -571,7 +591,7 @@ export default function HomeView({
 
           <button
             type="button"
-            onClick={() => handleGoToMenu('Burger')}
+            onClick={() => handleOpenProduct('The Classic Toon', 'Burger')}
             className="px-8 py-4 bg-[#34C759] text-white border-4 border-[#1a1c1c] shadow-[4px_4px_0px_0px_#111111] font-black text-sm uppercase rounded-2xl hover:bg-green-600 cursor-pointer"
           >
             ORDER TODAY'S SPECIAL • $14.99
@@ -580,7 +600,7 @@ export default function HomeView({
 
         <div className="relative shrink-0 flex justify-center">
           <div className="w-64 h-64 md:w-80 md:h-80 flex items-center justify-center p-4">
-            <img src="/foods/burger-classic.png" alt="The Classic Toon Hero" className="w-full h-full object-contain hover:scale-110 transition-transform duration-300" />
+            <img src="/foods/burger-classic.png" alt="The Classic Toon Hero" onClick={() => handleOpenProduct('The Classic Toon', 'Burger')} className="w-full h-full object-contain hover:scale-110 transition-transform duration-300 cursor-pointer" />
           </div>
         </div>
       </section>
@@ -597,7 +617,7 @@ export default function HomeView({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-[#FF70A6] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between text-white rotate-[-1deg]">
+          <div onClick={() => handleOpenProduct('Crispy Fish Hero Burger', 'Burger')} className="bg-[#FF70A6] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between text-white rotate-[-1deg] cursor-pointer hover:scale-[1.02] transition-transform">
             <span className="absolute top-3 right-3 bg-[#FFD23F] text-[#1a1c1c] border-2 border-[#1a1c1c] px-3 py-1 font-black text-[10px] uppercase rounded-full rotate-[12deg]">
              CRISPY CATCH
             </span>
@@ -608,7 +628,7 @@ export default function HomeView({
             </div>
           </div>
 
-          <div className="bg-[#00F0FF] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between text-[#1a1c1c] rotate-[1deg]">
+          <div onClick={() => handleOpenProduct('Hero Chicken Salad', 'Salads')} className="bg-[#00F0FF] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between text-[#1a1c1c] rotate-[1deg] cursor-pointer hover:scale-[1.02] transition-transform">
             <span className="absolute top-3 right-3 bg-[#FF0055] text-white border-2 border-[#1a1c1c] px-3 py-1 font-black text-[10px] uppercase rounded-full rotate-[-8deg]">
                FRESH POWER
             </span>
@@ -619,7 +639,7 @@ export default function HomeView({
             </div>
           </div>
 
-          <div className="bg-[#FFD23F] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between text-[#1a1c1c]">
+          <div onClick={() => handleOpenProduct('Loaded Power Nachos', 'Sides')} className="bg-[#FFD23F] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between text-[#1a1c1c] cursor-pointer hover:scale-[1.02] transition-transform">
             <span className="absolute top-3 right-3 bg-[#34C759] text-white border-2 border-[#1a1c1c] px-3 py-1 font-black text-[10px] uppercase rounded-full rotate-[5deg]">
                LOADED VALUE
             </span>
@@ -651,6 +671,7 @@ export default function HomeView({
           {[
             {
               id: "combo_adventurer",
+              productName: "Adventurer Combo",
               title: "ADVENTURER BUNDLE",
               desc: "1x Monster Burger + 1x Sidekick Fries + 1x Toon Shake",
               price: 18.99,
@@ -662,6 +683,7 @@ export default function HomeView({
             },
             {
               id: "combo_titans_party",
+              productName: "Titans Party Combo",
               title: "TITANS PARTY PACK",
               desc: "2x Pepperoni Slices + 4x Fizzy Sodas + 1x Garlic Dip",
               price: 32.50,
@@ -673,6 +695,7 @@ export default function HomeView({
             },
             {
               id: "combo_pokemon_chef",
+              productName: "Pokemon Chef Combo",
               title: "POKÉMON CHEFS SPECIAL",
               desc: "1x Comic Pasta Bowl + 1x Sidekick Fries + 1x Shake",
               price: 16.00,
@@ -682,8 +705,8 @@ export default function HomeView({
               badgeBg: "bg-[#34C759] text-white",
               angle: "rotate-[-1deg]"
             }
-          ].map((combo, i) => (
-            <div key={i} className={`bg-white border-4 border-[#1a1c1c] p-6 rounded-3xl shadow-[8px_8px_0px_0px_#111111] ${combo.angle} flex flex-col justify-between hover:scale-105 transition-transform duration-300`}>
+          ].map((combo) => (
+            <div key={combo.id} className={`bg-white border-4 border-[#1a1c1c] p-6 rounded-3xl shadow-[8px_8px_0px_0px_#111111] ${combo.angle} flex flex-col justify-between hover:scale-105 transition-transform duration-300`}>
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <span className={`${combo.badgeBg} border-2 border-[#1a1c1c] px-3 py-1 rounded-full text-xs font-black uppercase shadow-[2px_2px_0px_0px_#111111]`}>
@@ -696,7 +719,7 @@ export default function HomeView({
 
                 {/* Real Photorealistic Combo Meal Image Container */}
                 <div className="w-full h-52 md:h-60 flex items-center justify-center p-3 mb-4 relative">
-                  <img src={combo.comboImage} alt={combo.title} className="w-full h-full object-contain drop-shadow-[6px_6px_0px_rgba(0,0,0,0.15)] hover:scale-110 transition-transform duration-300" />
+                  <img src={combo.comboImage} alt={combo.title} onClick={() => handleOpenProduct(combo.productName, 'Combos')} className="w-full h-full object-contain drop-shadow-[6px_6px_0px_rgba(0,0,0,0.15)] hover:scale-110 transition-transform duration-300 cursor-pointer" />
                 </div>
 
                 <h3 className="font-headline-md text-xl md:text-2xl font-black uppercase text-[#1a1c1c] mb-1">{combo.title}</h3>
@@ -710,13 +733,7 @@ export default function HomeView({
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (onAddToCart) {
-                      onAddToCart(combo.id, { [combo.title]: true }, 1, combo.price);
-                    } else if (onAddDirectItem) {
-                      onAddDirectItem(combo.id);
-                    }
-                  }}
+                  onClick={() => handleAddProduct(combo.productName, 'Combos')}
                   className="px-5 py-3 bg-[#34C759] text-white border-3 border-[#1a1c1c] shadow-[3px_3px_0px_0px_#111111] font-black text-xs uppercase rounded-xl hover:bg-green-600 cursor-pointer"
                 >
                   GRAB COMBO BUNDLE 

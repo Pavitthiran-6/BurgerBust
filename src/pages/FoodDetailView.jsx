@@ -6,14 +6,13 @@ export default function FoodDetailView({
   loading = false,
   error = null,
   itemId,
-  setSelectedItemId,
+  onViewDetail,
   onAddToCart,
-  setCurrentPage,
   favorites = [],
   onToggleFavorite,
   showToast
 }) {
-  const currentItem = menuItems.find(item => item.id === itemId) || menuItems[0];
+  const currentItem = menuItems.find(item => item.id === itemId);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState({});
@@ -27,7 +26,7 @@ export default function FoodDetailView({
   }
 
   // Price calculations
-  const optionsPrice = Object.entries(selectedOptions).reduce((sum, [key, val]) => {
+  const optionsPrice = Object.values(selectedOptions).reduce((sum, val) => {
     return sum + (typeof val === 'number' ? val : 0);
   }, 0);
 
@@ -478,8 +477,8 @@ export default function FoodDetailView({
                 onToggleFavorite={onToggleFavorite}
                 onAddToCart={onAddToCart}
                 onViewDetail={(id) => {
-                  if (setSelectedItemId) {
-                    setSelectedItemId(id);
+                  if (onViewDetail) {
+                    onViewDetail(id);
                     window.scrollTo(0, 0);
                   }
                 }}

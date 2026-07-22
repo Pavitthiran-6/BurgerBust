@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function CheckoutView({
   cart,
@@ -7,15 +7,22 @@ export default function CheckoutView({
   addresses = [],
   paymentMethods = [],
   rewardPoints = 0,
+  isPlacingOrder = false,
   onPlaceOrder,
   setCurrentPage,
   showToast
 }) {
   const [step, setStep] = useState(1);
-  const [selectedAddressId, setSelectedAddressId] = useState(addresses[0]?.id || 1);
-  const [selectedPaymentId, setSelectedPaymentId] = useState(paymentMethods[0]?.id || 'p1');
-  const [deliveryNote, setDeliveryNote] = useState('Leave at Treehouse Door');
+  const [selectedAddressId, setSelectedAddressId] = useState(addresses.find(address => address.default)?.id || addresses[0]?.id || null);
+  const [selectedPaymentId, setSelectedPaymentId] = useState(paymentMethods.find(method => method.primary)?.id || paymentMethods[0]?.id || null);
+  const [deliveryNote, setDeliveryNote] = useState('Leave at the door');
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
+
+  useEffect(() => {
+    if (!addresses.some(address => address.id === selectedAddressId)) {
+      setSelectedAddressId(addresses.find(address => address.default)?.id || addresses[0]?.id || null);
+    }
+  }, [addresses, selectedAddressId]);
 
   const subtotal = summary?.subtotal ?? cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const discountPercent = appliedCoupon?.discountPercent || (appliedCoupon ? 20 : 0);
@@ -26,6 +33,23 @@ export default function CheckoutView({
 
   const activeAddress = addresses.find(a => a.id === selectedAddressId) || addresses[0];
   const activePayment = paymentMethods.find(p => p.id === selectedPaymentId) || paymentMethods[0];
+  const addressIsComplete = activeAddress && [
+    activeAddress.recipientName,
+    activeAddress.phone,
+    activeAddress.addressLine1 || activeAddress.address,
+    activeAddress.city,
+    activeAddress.state,
+    activeAddress.postalCode || activeAddress.pincode,
+  ].every(value => String(value || '').trim());
+
+  const handleContinueToPayment = () => {
+    if (!addressIsComplete) {
+      if (showToast) showToast('Add a complete delivery address before choosing payment.', 'warning');
+      setCurrentPage('address');
+      return;
+    }
+    setStep(2);
+  };
 
   const handleConfirmOrder = () => {
     if (addresses.length === 0) {
@@ -59,9 +83,11 @@ export default function CheckoutView({
   }
 
   return (
-    <div className="w-full py-8 flex flex-col items-center relative z-10 text-[#1a1c1c] max-w-4xl mx-auto px-4">
+    <div className="w-full py-8 flex flex-col items-center relative z-10 text-[#1a1c1c] max-w-5xl mx-auto px-4">
       {/* Header Banner */}
-      <div className="w-full bg-[#FF0055] text-white border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 text-center mb-8">
+      <div className="w-full bg-[#FF0055] text-white border-4 border-[#1a1c1c] shadow-[10px_10px_0px_0px_#111111] rounded-[2rem] p-6 md:p-8 text-center mb-8 relative overflow-hidden">
+        <span className="absolute -left-3 top-3 text-5xl rotate-[-12deg]" aria-hidden="true">⚡</span>
+        <span className="absolute -right-2 bottom-1 text-5xl rotate-[12deg]" aria-hidden="true">💥</span>
         <span className="bg-[#00F0FF] text-[#1a1c1c] border-2 border-[#1a1c1c] px-4 py-1 rounded-full text-xs font-black uppercase inline-block mb-2 rotate-[-2deg]">
           MISSION CONTROL CENTER
         </span>
@@ -71,10 +97,10 @@ export default function CheckoutView({
       </div>
 
       {/* Steps Form */}
-      <div className="w-full bg-white border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] p-6 md:p-8 rounded-3xl space-y-6">
-        <div className="flex border-b-4 border-[#1a1c1c] pb-4 gap-4 text-xs font-black uppercase">
-          <span className={step === 1 ? 'text-[#FF0055] underline' : 'text-gray-400'}>1. BASE ADDRESS & INSTRUCTIONS</span>
-          <span className={step === 2 ? 'text-[#FF0055] underline' : 'text-gray-400'}>2. POWER WALLET & DISPATCH</span>
+      <div className="w-full bg-white border-4 border-[#1a1c1c] shadow-[10px_10px_0px_0px_#111111] p-6 md:p-8 rounded-[2rem] space-y-6 dots-bg">
+        <div className="grid grid-cols-1 sm:grid-cols-2 border-b-4 border-[#1a1c1c] pb-4 gap-3 text-xs font-black uppercase">
+          <span className={`border-2 border-[#1a1c1c] rounded-xl px-4 py-3 ${step === 1 ? 'bg-[#FFD23F] text-[#1a1c1c] shadow-[3px_3px_0px_0px_#111111]' : 'bg-gray-100 text-gray-400'}`}>1. BASE ADDRESS & INSTRUCTIONS</span>
+          <span className={`border-2 border-[#1a1c1c] rounded-xl px-4 py-3 ${step === 2 ? 'bg-[#00F0FF] text-[#1a1c1c] shadow-[3px_3px_0px_0px_#111111]' : 'bg-gray-100 text-gray-400'}`}>2. POWER WALLET & DISPATCH</span>
         </div>
 
         {step === 1 ? (
@@ -116,7 +142,10 @@ export default function CheckoutView({
                         />
                         <div>
                           <span className="font-black text-xs uppercase block">{addr.title} ({addr.tag})</span>
-                          <span className="text-[11px] font-bold text-gray-600">{addr.address}</span>
+                          <span className="text-[11px] font-bold text-gray-600 block">{addr.address}</span>
+                          <span className="text-[10px] font-bold text-gray-500 block">
+                            {[addr.city, addr.state, addr.postalCode || addr.pincode].filter(Boolean).join(', ')}
+                          </span>
                         </div>
                       </div>
                       {addr.default && <span className="bg-[#34C759] text-white text-[9px] font-black px-2 py-0.5 rounded uppercase border border-black">PRIMARY</span>}
@@ -130,7 +159,7 @@ export default function CheckoutView({
             <div className="space-y-2">
               <h3 className="font-black text-sm uppercase">CLASSIFIED DELIVERY INSTRUCTIONS</h3>
               <div className="space-y-2">
-                {['Leave at Treehouse Door', 'Don\'t Ring Bell - Sleeping Dragon', 'Ring 3 Times & Shout BOOM!'].map((note, i) => (
+                {['Leave at the door', 'Do not ring the bell', 'Call when you arrive'].map((note, i) => (
                   <label key={i} className="flex items-center gap-3 p-3 border-2 border-[#1a1c1c] rounded-xl bg-[#fcfbf7] text-xs font-bold cursor-pointer">
                     <input
                       type="radio"
@@ -146,7 +175,7 @@ export default function CheckoutView({
 
             <button
               type="button"
-              onClick={() => setStep(2)}
+              onClick={handleContinueToPayment}
               className="w-full py-3.5 bg-[#FFD23F] text-[#1a1c1c] border-3 border-[#1a1c1c] shadow-[4px_4px_0px_0px_#111111] font-black text-xs uppercase rounded-xl cursor-pointer hover:bg-yellow-400"
             >
               NEXT: POWER WALLET 
@@ -201,7 +230,7 @@ export default function CheckoutView({
             </div>
 
             {/* Mission Manifest Summary */}
-            <div className="bg-[#fcfbf7] border-3 border-[#1a1c1c] p-5 rounded-2xl space-y-2 text-xs font-bold">
+            <div className="bg-[#FFF8E7] border-3 border-[#1a1c1c] p-5 rounded-2xl space-y-2 text-xs font-bold shadow-[4px_4px_0px_0px_#FFD23F]">
               <div className="flex justify-between"><span>SUBTOTAL ({cart.reduce((a,c) => a + c.quantity, 0)} ITEMS)</span><span>${subtotal.toFixed(2)}</span></div>
               {appliedCoupon && (
                 <div className="flex justify-between text-green-600 font-black">

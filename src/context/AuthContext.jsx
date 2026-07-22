@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem('burger_profile', JSON.stringify({
         name: currentUser.name,
         email: currentUser.email,
-        phone: "555-0199",
+        phone: currentUser.phone || '',
         avatar: null
       }));
     } else {
