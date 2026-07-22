@@ -40,7 +40,7 @@ export default function CartView({
   };
 
   return (
-    <div className="mystery-map-bg text-on-background font-body-md min-h-screen pb-16 w-full px-4 md:px-8 relative text-[#1a1c1c] max-w-[1200px] mx-auto pt-6 rounded-3xl">
+    <div className="w-full max-w-[1200px] mx-auto px-2 md:px-6 pt-4 pb-16 text-[#1a1c1c] relative z-10">
       <div className="spooky-mist" />
       <div className="spooky-mist-right" />
 

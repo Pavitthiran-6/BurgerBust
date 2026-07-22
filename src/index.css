@@ -508,9 +508,7 @@
   box-shadow: 0px 0px 0px 0px #111111;
 }
 .mystery-map-bg {
-  background-color: #f4f1ea;
-  background-image: radial-gradient(#d1c5ad 1px, transparent 1px);
-  background-size: 20px 20px;
+  background: transparent;
   position: relative;
 }
 .spooky-mist {
