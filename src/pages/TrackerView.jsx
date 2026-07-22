@@ -45,7 +45,7 @@ export default function TrackerView({ currentOrder, onCancelOrder, showToast, se
       return { startedAt: Date.now(), startStep: serverStep };
     }
 
-    const storageKey = `burgerbust-tracker-demo-${currentOrder.id}`;
+    const storageKey = `burgerbust-tracker-demo-v2-${currentOrder.id}`;
     try {
       const saved = JSON.parse(window.sessionStorage.getItem(storageKey));
       if (Number.isFinite(saved?.startedAt) && Number.isFinite(saved?.startStep)) return saved;
@@ -190,10 +190,11 @@ export default function TrackerView({ currentOrder, onCancelOrder, showToast, se
             {STEPS.map((step, index) => {
               const completed = !cancelled && index < visualProgress;
               const active = !cancelled && index === visualProgress && visualProgress < STEPS.length;
+              const showBubble = active || (!cancelled && delivered && index === STEPS.length - 1);
 
               return (
                 <article key={step.label} className="relative flex min-w-0 justify-center text-center">
-                  {active && (
+                  {showBubble && (
                     <div className="absolute left-1/2 top-0 z-30 w-[94%] max-w-36 -translate-x-1/2 animate-bounce">
                       <div className="speech-bubble rounded-lg border-2 border-black bg-white p-1.5 text-center text-[7px] font-black leading-[1.05] shadow-[3px_3px_0px_0px_#111111] sm:text-[9px] md:rounded-xl md:text-xs">
                         “{step.bubble}”
