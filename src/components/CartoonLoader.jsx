@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ben10Sound from '../assets/ben 10 sound.mp3';
 
 const ALIEN_MESSAGES = [
   "TRANSFORMING INTO HEATBLAST...",
@@ -7,8 +8,8 @@ const ALIEN_MESSAGES = [
   "OMNITRIX FULLY CHARGED!"
 ];
 
-const OMNITRIX_MP3_URL = '/sounds/omnitrix.mp3';
-const OMNITRIX_FALLBACK_URL = 'https://www.myinstants.com/media/sounds/barulhino-omnitrix-tururururururrurururuuuuuu.mp3';
+const OMNITRIX_MP3_URL = ben10Sound;
+const OMNITRIX_FALLBACK_URL = ben10Sound;
 
 export default function CartoonLoader({ isVisible = true, onFinish }) {
   const [msgIndex, setMsgIndex] = useState(0);
