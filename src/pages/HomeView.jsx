@@ -85,30 +85,9 @@ export default function HomeView({
 
   return (
     <div className="flex flex-col gap-24 w-full">
-      {/* Logged In Personalized Welcome Banner */}
-      {isLoggedIn && (
-        <div className="w-full bg-[#00F0FF] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[#1a1c1c] mt-4">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-[#FF0055] text-white border-3 border-[#1a1c1c] rounded-2xl flex items-center justify-center font-black text-2xl shadow-[2px_2px_0px_0px_#111111]">
-              
-            </div>
-            <div>
-              <h2 className="font-headline-md text-2xl font-black uppercase">WELCOME BACK, {user?.name || 'SAILOR HERO'}!</h2>
-              <p className="text-xs font-bold text-gray-800">You have {rewardPoints} Pokéball Points ready to redeem in Hero Academy!</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => handleGoToMenu('All')}
-            className="px-6 py-3 bg-[#FFD23F] text-[#1a1c1c] border-3 border-[#1a1c1c] font-black text-xs uppercase rounded-xl hover:bg-yellow-400 cursor-pointer shadow-[3px_3px_0px_0px_#111111]"
-          >
-            CONTINUE ORDERING 
-          </button>
-        </div>
-      )}
-
       {/* 1. Dynamic Hero Panel */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4 w-full">
+      <div className="flex flex-col gap-8 w-full">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4 w-full">
         {/* Left Big Card (Toon Boss) */}
         <div className="lg:col-span-8 bg-[#FFD23F] comic-border rounded-3xl p-8 relative overflow-hidden flex flex-col md:flex-row items-center shadow-[12px_12px_0px_0px_rgba(17,17,17,1)] transform -rotate-1">
           <div className="flex-grow z-10 flex flex-col items-start">
@@ -151,7 +130,28 @@ export default function HomeView({
             <span className="font-black text-xl">SALTY!</span>
           </div>
         </div>
-      </section>
+        </section>
+
+        {/* Logged In Personalized Welcome Banner */}
+        {isLoggedIn && (
+          <div className="w-full bg-[#00F0FF] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[#1a1c1c]">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-[#FF0055] text-white border-3 border-[#1a1c1c] rounded-2xl flex items-center justify-center font-black text-2xl shadow-[2px_2px_0px_0px_#111111]" />
+              <div>
+                <h2 className="font-headline-md text-2xl font-black uppercase">WELCOME BACK, {user?.name || 'SAILOR HERO'}!</h2>
+                <p className="text-xs font-bold text-gray-800">You have {rewardPoints} Pokéball Points ready to redeem in Hero Academy!</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleGoToMenu('All')}
+              className="px-6 py-3 bg-[#FFD23F] text-[#1a1c1c] border-3 border-[#1a1c1c] font-black text-xs uppercase rounded-xl hover:bg-yellow-400 cursor-pointer shadow-[3px_3px_0px_0px_#111111]"
+            >
+              CONTINUE ORDERING
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* 2. The Toon Bucket (Bundles) */}
       <section className="bg-black comic-border rounded-[40px] p-10 md:p-16 relative overflow-hidden shadow-[16px_16px_0px_0px_rgba(255,210,63,1)] w-full">
