@@ -1,52 +1,109 @@
 # BurgerBurst
 
-BurgerBurst is a React/Vite storefront backed by a Java 21 and Spring Boot API. It includes the complete customer commerce journey plus a production admin console, analytics dashboards, bulk catalog/inventory management, customer administration, broadcasts, and CSV/XLSX reports.
+BurgerBurst is a colorful, responsive food-ordering platform with a playful comic-inspired interface. It combines a customer storefront with a complete administration workspace for managing day-to-day restaurant operations.
 
-## Run locally
+## Highlights
 
-Start the backend from `backend` after configuring its environment variables:
+### Customer experience
 
-```powershell
-mvn spring-boot:run
-```
+- Browse featured dishes, categories, offers, and recommendations
+- Search the menu and view detailed food information
+- Customize items with toppings and quantity controls
+- Save favorites and recently viewed items
+- Manage the cart, coupons, rewards, and checkout
+- Follow order progress and review previous orders
+- Manage profile information, addresses, notifications, and preferences
+- Enjoy responsive layouts designed for mobile, tablet, and desktop
 
-Start the frontend from the project root:
+### Administration workspace
 
-```powershell
-$env:VITE_API_BASE_URL = 'http://localhost:8080/api/v1'
+- View restaurant performance from a central dashboard
+- Manage products, categories, pricing, and availability
+- Monitor stock levels and inventory activity
+- Process and track customer orders
+- Manage customers, coupons, rewards, and notifications
+- Review analytics and export operational reports
+- Maintain restaurant settings and administrator profiles
+
+## Technology
+
+The project is built with:
+
+- React 19 and Vite
+- Tailwind CSS
+- Framer Motion and GSAP
+- Lucide React icons
+- Java 21 and Spring Boot
+- PostgreSQL and Flyway
+- Docker and Render deployment configuration
+
+## Getting started
+
+### Prerequisites
+
+- Node.js 24 or a compatible current release
+- npm
+
+### Installation
+
+```bash
+git clone https://github.com/Pavitthiran-6/BurgerBust.git
+cd BurgerBust
 npm install
 npm run dev
 ```
 
-The frontend defaults to `http://localhost:8080/api/v1` when `VITE_API_BASE_URL` is not set.
+Open the local address displayed by Vite in your terminal.
 
-Razorpay checkout requires `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET` in the backend environment. When credentials are absent, payment creation fails safely and COD remains available.
+## Available commands
 
-## Verification
-
-```powershell
-cd backend
-mvn clean verify
-
-cd ..
+```bash
+npm run dev
 npm run lint
+npm run build
+npm run preview
+```
+
+## Project structure
+
+```text
+BurgerBust/
+|-- backend/       Java server application and database migrations
+|-- docs/          Deployment, operations, and security documentation
+|-- public/        Static images, icons, and sound assets
+|-- src/
+|   |-- admin/     Administration workspace
+|   |-- components/ Shared interface components
+|   |-- context/   Application context providers
+|   |-- data/      Menu and restaurant presentation data
+|   |-- hooks/     Reusable React hooks
+|   |-- pages/     Customer-facing views
+|   `-- services/  Client-side service modules
+|-- render.yaml    Render deployment blueprint
+`-- vite.config.js Vite configuration
+```
+
+## Production build
+
+Create an optimized frontend build with:
+
+```bash
 npm run build
 ```
 
-Useful development URLs:
+The generated output is written to `dist/`.
 
-- Frontend: `http://localhost:5173`
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- Health: `http://localhost:8080/actuator/health`
+## Deployment
 
-Swagger is disabled under the backend `prod` profile.
+The repository includes a Render blueprint for deploying the application. Keep all production configuration in the hosting platform's protected environment settings and never commit local environment files or credentials.
 
-## Production
+## Security
 
-Use [render.yaml](render.yaml) to deploy the Docker API and static frontend. Production setup, database recovery, API additions, and the release gate are documented in:
+- Local environment files are excluded through `.gitignore`
+- Example configuration files contain placeholders only
+- Production credentials must remain outside source control
+- Review staged changes before every push
 
-- [Deployment guide](docs/DEPLOYMENT.md)
-- [Database operations](docs/DATABASE_OPERATIONS.md)
-- [Phase 5 API](docs/API_PHASE5.md)
-- [Production checklist](docs/PRODUCTION_CHECKLIST.md)
-- [Security review](docs/SECURITY_REVIEW.md)
+## Project status
+
+BurgerBurst includes the main customer ordering journey, administration tools, responsive layouts, production build configuration, and deployment documentation. Continued work can focus on usability refinements, accessibility, automated browser coverage, and operational monitoring.
