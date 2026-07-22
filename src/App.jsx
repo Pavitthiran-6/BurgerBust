@@ -190,7 +190,7 @@ function AppContent() {
   };
 
   // Protected Page Guard & Navigator
-  const setCurrentPage = (page, detailItemId = null) => {
+  const setCurrentPage = (page, detailItemId = null, skipTransition = false) => {
     const protectedPages = ['favorites', 'checkout', 'rewards', 'profile', 'orders', 'address', 'addresses', 'payment', 'payments', 'tracker'];
 
     if (page === 'login') {
@@ -210,7 +210,7 @@ function AppContent() {
       setSelectedItemId(null);
     }
 
-    if (page !== currentPage) {
+    if (page !== currentPage && !skipTransition) {
       triggerComicTransition();
     }
     setCurrentPageState(page);
@@ -626,7 +626,7 @@ function AppContent() {
             Analytics.orderPlaced(confirmed.id, confirmed.total);
             setOrders(previous => [confirmed, ...previous.filter(item => item.id !== confirmed.id)]);
             showToast(`Payment verified for ${confirmed.orderNumber}!`, 'success');
-            openOrderConfirmation(confirmed);
+            setCurrentPage('tracker', null, true);
             syncCart(await cartService.getCart());
             await refreshCommerceData();
           } catch (error) {

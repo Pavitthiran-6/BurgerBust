@@ -15,11 +15,22 @@ export default function TrackerView({ currentOrder, onCancelOrder, setCurrentPag
   const orderId = currentOrder?.id;
   const orderNumber = currentOrder?.orderNumber;
   const orderStatus = currentOrder?.status;
+  const orderStatusCode = currentOrder?.statusCode;
   const otpCode = currentOrder?.otp || "Available from your delivery partner";
 
-  const isOutForDelivery = orderStatus === "Out for Delivery" || orderStatus === "Delivered";
-  const isDelivered = orderStatus === "Delivered";
-  const canCancel = orderStatus === "Placed" || orderStatus === "Preparing";
+  const stage = {
+    PAYMENT_PENDING: 0,
+    PLACED: 1,
+    CONFIRMED: 1,
+    PREPARING: 2,
+    READY: 3,
+    OUT_FOR_DELIVERY: 4,
+    DELIVERED: 5,
+  }[orderStatusCode] || 0;
+  const isOutForDelivery = stage >= 4;
+  const isDelivered = orderStatusCode === 'DELIVERED';
+  const canCancel = ['PLACED', 'CONFIRMED'].includes(orderStatusCode);
+  const progressWidth = stage <= 1 ? '25%' : stage === 2 ? '50%' : stage === 3 ? '75%' : '98%';
 
   // Show celebration once on Delivered
   React.useEffect(() => {
@@ -160,18 +171,16 @@ export default function TrackerView({ currentOrder, onCancelOrder, setCurrentPag
               <div className="w-full h-4 bg-gray-200 border-2 border-[#1a1c1c] rounded-full overflow-hidden">
                 <div
                   className="h-full bg-[#00A0E9] border-r-2 border-[#1a1c1c] transition-all duration-1000"
-                  style={{
-                    width: orderStatus === 'Placed' ? '25%' : orderStatus === 'Preparing' ? '50%' : orderStatus === 'Cooking' ? '75%' : '98%'
-                  }}
+                  style={{ width: progressWidth }}
                 ></div>
               </div>
             </div>
 
             {/* Stage Timeline Badges */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px] font-black uppercase text-center">
-              <div className={`p-2 rounded-xl border-2 border-[#1a1c1c] ${orderStatus === 'Placed' ? 'bg-[#FFD23F]' : 'bg-gray-100'}`}>1. PLACED</div>
-              <div className={`p-2 rounded-xl border-2 border-[#1a1c1c] ${orderStatus === 'Preparing' ? 'bg-[#FFD23F]' : 'bg-gray-100'}`}>2. PREPARING</div>
-              <div className={`p-2 rounded-xl border-2 border-[#1a1c1c] ${orderStatus === 'Cooking' ? 'bg-[#FFD23F]' : 'bg-gray-100'}`}>3. COOKING</div>
+              <div className={`p-2 rounded-xl border-2 border-[#1a1c1c] ${stage === 1 ? 'bg-[#FFD23F]' : 'bg-gray-100'}`}>1. CONFIRMED</div>
+              <div className={`p-2 rounded-xl border-2 border-[#1a1c1c] ${stage === 2 ? 'bg-[#FFD23F]' : 'bg-gray-100'}`}>2. PREPARING</div>
+              <div className={`p-2 rounded-xl border-2 border-[#1a1c1c] ${stage === 3 ? 'bg-[#FFD23F]' : 'bg-gray-100'}`}>3. READY</div>
               <div className={`p-2 rounded-xl border-2 border-[#1a1c1c] ${isOutForDelivery ? 'bg-[#34C759] text-white' : 'bg-gray-100'}`}>4. OUT FOR DELIVERY</div>
             </div>
           </div>
