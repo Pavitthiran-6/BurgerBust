@@ -128,7 +128,7 @@ export default function CartoonLoader({ isVisible = true, onFinish }) {
 
         <h1 style={{ fontFamily: 'Impact, Arial Black, sans-serif', letterSpacing: '4px' }}
           className="text-6xl md:text-8xl font-black uppercase text-[#000000]">
-          IT'S HERO TIME!
+          IT'S EATING TIME!
         </h1>
       </div>
     );
