@@ -1,0 +1,17 @@
+package com.burgerburst.dto.order;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+public record DeliveryAddressRequest(
+        @NotBlank @Size(max = 120) String recipientName,
+        @NotBlank @Pattern(regexp = "^[+0-9][0-9 ()-]{6,19}$") String phone,
+        @NotBlank @Size(max = 200) String addressLine1,
+        @Size(max = 200) String addressLine2,
+        @NotBlank @Size(max = 100) String city,
+        @NotBlank @Size(max = 100) String state,
+        @NotBlank @Size(max = 20) String postalCode,
+        @Size(max = 500) String deliveryInstructions) {
+}
+

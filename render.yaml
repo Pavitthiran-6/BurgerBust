@@ -1,0 +1,84 @@
+services:
+  - type: web
+    name: burgerburst-api
+    runtime: docker
+    plan: starter
+    region: singapore
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health/readiness
+    maxShutdownDelaySeconds: 30
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_USERNAME
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        fromService:
+          type: web
+          name: burgerburst-web
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+      - key: DB_MAX_POOL_SIZE
+        value: 8
+      - key: DB_MIN_IDLE
+        value: 2
+      - key: EMAIL_PROVIDER
+        value: brevo
+      - key: BREVO_API_KEY
+        sync: false
+      - key: EMAIL_SENDER_EMAIL
+        sync: false
+      - key: EMAIL_SENDER_NAME
+        value: BurgerBurst
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+
+  - type: web
+    name: burgerburst-web
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: VITE_API_HOST
+        fromService:
+          type: web
+          name: burgerburst-api
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+    headers:
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' https://www.myinstants.com; connect-src 'self' https://*.onrender.com https://*.razorpay.com; frame-src https://*.razorpay.com; worker-src 'self' blob:; form-action 'self'; upgrade-insecure-requests"
+      - path: /*
+        name: Strict-Transport-Security
+        value: max-age=31536000; includeSubDomains
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=(), payment=(self "https://*.razorpay.com")
+      - path: /*
+        name: Cross-Origin-Opener-Policy
+        value: same-origin-allow-popups
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
