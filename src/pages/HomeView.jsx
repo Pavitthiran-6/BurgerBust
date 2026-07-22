@@ -132,25 +132,7 @@ export default function HomeView({
         </div>
         </section>
 
-        {/* Logged In Personalized Welcome Banner */}
-        {isLoggedIn && (
-          <div className="w-full bg-[#00F0FF] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[#1a1c1c]">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-[#FF0055] text-white border-3 border-[#1a1c1c] rounded-2xl flex items-center justify-center font-black text-2xl shadow-[2px_2px_0px_0px_#111111]" />
-              <div>
-                <h2 className="font-headline-md text-2xl font-black uppercase">WELCOME BACK, {user?.name || 'SAILOR HERO'}!</h2>
-                <p className="text-xs font-bold text-gray-800">You have {rewardPoints} Pokéball Points ready to redeem in Hero Academy!</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleGoToMenu('All')}
-              className="px-6 py-3 bg-[#FFD23F] text-[#1a1c1c] border-3 border-[#1a1c1c] font-black text-xs uppercase rounded-xl hover:bg-yellow-400 cursor-pointer shadow-[3px_3px_0px_0px_#111111]"
-            >
-              CONTINUE ORDERING
-            </button>
-          </div>
-        )}
+
       </div>
 
       {/* 2. The Toon Bucket (Bundles) */}
