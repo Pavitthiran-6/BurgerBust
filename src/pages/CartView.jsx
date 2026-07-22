@@ -45,12 +45,14 @@ export default function CartView({
       <div className="spooky-mist-right" />
 
       {/* Main Title Section */}
-      <div className="text-center mb-12 relative z-10">
-        <h1 className="font-headline-xl text-3xl md:text-5xl text-on-background uppercase inline-block bg-primary-container px-6 py-2 border-4 border-on-background shadow-[8px_8px_0px_0px_#111111] transform -rotate-2 font-extrabold">
-          The Mystery Order
-        </h1>
-        <div className="action-bubble top-[-20px] right-4 md:right-[20%] font-headline-md text-xl md:text-2xl font-bold">
-          ZOINKS!
+      <div className="text-center mb-12 relative z-10 flex justify-center">
+        <div className="relative inline-block">
+          <h1 className="font-headline-xl text-3xl md:text-5xl text-on-background uppercase inline-block bg-primary-container px-6 py-2 border-4 border-on-background shadow-[8px_8px_0px_0px_#111111] transform -rotate-2 font-extrabold">
+            The Mystery Order
+          </h1>
+          <div className="action-bubble -top-8 -right-8 md:-right-14 font-headline-md text-base md:text-xl font-bold">
+            ZOINKS!
+          </div>
         </div>
       </div>
 
