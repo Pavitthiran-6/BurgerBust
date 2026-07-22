@@ -61,16 +61,16 @@ export default function AddressForm({ profile = {}, onSave, onCancel, submitLabe
     }
   };
 
-  const inputClass = 'w-full p-3 border-2 border-[#1a1c1c] rounded-xl font-bold text-xs bg-white';
+  const inputClass = 'w-full p-3 border-2 border-[#1a1c1c] rounded-xl font-body-md font-bold text-xs bg-white text-[#1a1c1c]';
 
   return (
-    <form onSubmit={handleSubmit} className="bg-[#FFF8E7] border-3 border-[#1a1c1c] p-5 rounded-2xl space-y-3">
+    <form onSubmit={handleSubmit} className="bg-[#FFF8E7] border-3 border-[#1a1c1c] p-5 rounded-2xl space-y-3 font-body-md">
       <div>
-        <h4 className="font-black text-sm uppercase">ADD YOUR DELIVERY ADDRESS</h4>
-        <p className="text-[11px] font-bold text-gray-600">Saved securely to your BurgerBurst account for future checkout.</p>
+        <h4 className="font-headline-md font-black text-base uppercase text-[#1a1c1c]">ADD YOUR DELIVERY ADDRESS</h4>
+        <p className="font-body-md text-xs font-semibold text-gray-600">Saved securely to your BurgerBurst account for future checkout.</p>
       </div>
 
-      {error && <p className="rounded-xl border-2 border-red-600 bg-red-50 p-3 text-xs font-black text-red-700">{error}</p>}
+      {error && <p className="rounded-xl border-2 border-red-600 bg-red-50 p-3 text-xs font-headline-md font-black text-red-700">{error}</p>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <input type="text" placeholder="Recipient Name *" value={form.recipientName} onChange={event => update('recipientName', event.target.value)} required className={inputClass} />
@@ -95,12 +95,12 @@ export default function AddressForm({ profile = {}, onSave, onCancel, submitLabe
       <input type="text" placeholder="Landmark (near hospital, school...)" value={form.landmark} onChange={event => update('landmark', event.target.value)} className={inputClass} />
       <textarea placeholder="Delivery notes (e.g. Ring bell twice, leave at door...)" value={form.deliveryInstructions} onChange={event => update('deliveryInstructions', event.target.value)} rows={2} maxLength="500" className={`${inputClass} resize-none`} />
 
-      <div className="flex flex-wrap gap-3">
-        <button type="submit" disabled={saving} className="px-6 py-2.5 bg-[#34C759] text-white border-2 border-[#1a1c1c] font-black text-xs uppercase rounded-xl cursor-pointer disabled:opacity-60">
+      <div className="flex flex-wrap gap-3 pt-1">
+        <button type="submit" disabled={saving} className="px-6 py-3 bg-[#10B981] text-white border-2 border-[#1a1c1c] font-headline-md font-black text-xs uppercase rounded-xl cursor-pointer disabled:opacity-60 hover:bg-green-600 transition-all">
           {saving ? 'SAVING ADDRESS...' : submitLabel}
         </button>
         {onCancel && (
-          <button type="button" onClick={onCancel} disabled={saving} className="px-5 py-2.5 bg-white border-2 border-[#1a1c1c] font-black text-xs uppercase rounded-xl cursor-pointer">
+          <button type="button" onClick={onCancel} disabled={saving} className="px-5 py-3 bg-white border-2 border-[#1a1c1c] font-headline-md font-black text-xs uppercase rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
             CANCEL
           </button>
         )}
