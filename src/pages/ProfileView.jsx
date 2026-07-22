@@ -17,9 +17,9 @@ export default function ProfileView({
   const [activeTab, setActiveTab] = useState('PROFILE');
 
   // Profile Form State
-  const [name, setName] = useState(profile.name || 'Finn the Hero');
-  const [email, setEmail] = useState(profile.email || 'finn@landofooo.com');
-  const [phone, setPhone] = useState(profile.phone || '555-0199');
+  const [name, setName] = useState(profile.name || '');
+  const [email, setEmail] = useState(profile.email || '');
+  const [phone, setPhone] = useState(profile.phone || '');
   const [saved, setSaved] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(profile.avatar || null);
 

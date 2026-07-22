@@ -88,7 +88,7 @@ export default function AddressView({ addresses = [], setAddresses, showToast, p
       <div className="w-full bg-[#70D6FF] border-4 border-[#1a1c1c] shadow-[8px_8px_0px_0px_#111111] rounded-3xl p-6 md:p-8 text-center mb-8">
         <span className="bg-[#FFD23F] text-[#1a1c1c] border-2 border-[#1a1c1c] px-3 py-0.5 rounded-full text-xs font-black uppercase inline-block mb-2 rotate-[-2deg]">PARCHMENT MAP PINS</span>
         <h1 className="font-display-xl text-3xl md:text-5xl font-black uppercase">TREASURE MAP SECRET BASES</h1>
-        <p className="text-xs font-bold text-gray-800">PINNED DELIVERY LOCATIONS & GPS COORDINATES! (MAX {MAX_ADDRESSES})</p>
+        <p className="text-xs font-bold text-gray-800">YOUR SAVED DELIVERY DETAILS FOR FASTER CHECKOUT! (MAX {MAX_ADDRESSES})</p>
       </div>
 
       {/* Address List */}
