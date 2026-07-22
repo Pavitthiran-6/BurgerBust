@@ -75,7 +75,7 @@ class PaymentServiceTest {
         order.setUuid(UUID.randomUUID());
         order.setOrderNumber("BB-20260721-TEST");
         order.setUser(user);
-        order.setStatus(OrderStatus.PLACED);
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
         order.setPaymentMethod(PaymentMethod.RAZORPAY);
         order.setTotal(new BigDecimal("20.50"));
         order.setCurrency("INR");
@@ -143,7 +143,7 @@ class PaymentServiceTest {
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.SUCCESS);
         assertThat(payment.getProviderPaymentId()).isEqualTo("pay_1");
-        verify(orderService).updateStatus(eq(order.getUuid()), any());
+        verify(orderService).completePaidOrder(order.getUuid());
         verify(webhookRepository).save(any());
     }
 

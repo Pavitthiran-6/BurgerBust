@@ -234,9 +234,8 @@ public class PaymentService {
         payment.setFailureReason(null);
         paymentRepository.save(payment);
         audit(payment, type, externalEventId, "Payment verified", payloadHash);
-        if (payment.getOrder().getStatus() == OrderStatus.PLACED) {
-            orderService.updateStatus(payment.getOrder().getUuid(),
-                    new OrderStatusUpdateRequest(OrderStatus.CONFIRMED, "Payment verified"));
+        if (payment.getOrder().getStatus() == OrderStatus.PAYMENT_PENDING) {
+            orderService.completePaidOrder(payment.getOrder().getUuid());
         }
         publish(payment, NotificationType.PAYMENT_SUCCESS, "Payment successful",
                 "Payment succeeded for order " + payment.getOrder().getOrderNumber() + ".");

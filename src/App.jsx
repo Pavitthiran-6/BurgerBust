@@ -24,6 +24,7 @@ import SearchView from './pages/SearchView';
 import CategoriesView from './pages/CategoriesView';
 import CartoonLoader from './components/CartoonLoader';
 import OrderConfirmation from './components/OrderConfirmation';
+import RazorpayLaunchOverlay from './components/RazorpayLaunchOverlay';
 import { productService } from './services/productService';
 import { categoryService } from './services/categoryService';
 import { useRestaurantStatus } from './hooks/useRestaurantStatus';
@@ -110,6 +111,7 @@ function AppContent() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [razorpayOverlayMode, setRazorpayOverlayMode] = useState(null);
   const [confirmedOrder, setConfirmedOrder] = useState(null);
   const [toasts, setToasts] = useState([]);
   const confirmationTimerRef = useRef(null);
@@ -529,6 +531,7 @@ function AppContent() {
     if (isPlacingOrder) return;
     setIsPlacingOrder(true);
     const razorpay = !selectedPayment?.type?.toUpperCase().includes('CASH');
+    if (razorpay) setRazorpayOverlayMode('opening');
     const address = {
       recipientName: deliveryAddress?.recipientName || profile.name || 'BurgerBurst Customer',
       phone: deliveryAddress?.phone || profile.phone,
@@ -539,22 +542,56 @@ function AppContent() {
       postalCode: deliveryAddress?.postalCode || deliveryAddress?.pincode,
       deliveryInstructions: deliveryAddress?.deliveryInstructions || deliveryAddress?.deliveryNotes || null,
     };
+    let pendingOrder = null;
+    let checkoutOpened = false;
+    let paymentCompleted = false;
+
+    const cancelPendingOrder = async reason => {
+      if (!pendingOrder || paymentCompleted) return;
+      const orderId = pendingOrder.id;
+      pendingOrder = null;
+      try {
+        await orderService.cancelOrder(orderId, reason);
+      } catch {
+        // A concurrent verified-payment callback may have completed the order first.
+      }
+    };
+
+    const waitForConfirmedOrder = async orderId => {
+      let lastError = null;
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        try {
+          const latest = await orderService.getOrder(orderId);
+          if (latest.statusCode === 'CONFIRMED') return latest;
+          if (latest.statusCode === 'CANCELLED') throw new Error('The pending order was cancelled');
+        } catch (error) {
+          lastError = error;
+        }
+        if (attempt < 4) await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      throw lastError || new Error('Backend payment confirmation is still pending');
+    };
+
     try {
       Analytics.checkoutStarted(cartSummary.total, cartSummary.itemCount);
+      const checkoutScript = razorpay ? loadRazorpayCheckout() : null;
       const order = await orderService.createOrder(address, razorpay ? 'RAZORPAY' : 'COD', rewardPointsToUse);
-      Analytics.orderPlaced(order.id, order.total);
-      setOrders(previous => [order, ...previous]);
-      syncCart(await cartService.getCart());
       if (!razorpay) {
+        Analytics.orderPlaced(order.id, order.total);
+        setOrders(previous => [order, ...previous]);
+        syncCart(await cartService.getCart());
         showToast(`Order ${order.orderNumber} placed successfully!`, 'success');
         await refreshCommerceData();
         openOrderConfirmation(order);
         setIsPlacingOrder(false);
         return;
       }
+      pendingOrder = order;
       const idempotencyKey = window.crypto?.randomUUID?.() || `${order.id}-${Date.now()}`;
-      const payment = await paymentService.createOrder(order.id, idempotencyKey);
-      await loadRazorpayCheckout();
+      const [payment] = await Promise.all([
+        paymentService.createOrder(order.id, idempotencyKey),
+        checkoutScript,
+      ]);
       const checkout = new window.Razorpay({
         key: payment.keyId,
         amount: payment.amountInSubunits,
@@ -573,30 +610,58 @@ function AppContent() {
           },
         },
         handler: async response => {
+          paymentCompleted = true;
+          setRazorpayOverlayMode('verifying');
           try {
-            await paymentService.verify(response);
-            showToast(`Payment verified for ${order.orderNumber}!`, 'success');
+            let verificationError = null;
+            try {
+              await paymentService.verify(response);
+            } catch (error) {
+              verificationError = error;
+            }
+            const confirmed = await waitForConfirmedOrder(order.id).catch(error => {
+              throw verificationError || error;
+            });
+            pendingOrder = null;
+            Analytics.orderPlaced(confirmed.id, confirmed.total);
+            setOrders(previous => [confirmed, ...previous.filter(item => item.id !== confirmed.id)]);
+            showToast(`Payment verified for ${confirmed.orderNumber}!`, 'success');
+            openOrderConfirmation(confirmed);
+            syncCart(await cartService.getCart());
             await refreshCommerceData();
-            openOrderConfirmation(order);
           } catch (error) {
-            showToast(error.message, 'error');
+            showToast(`${error.message}. Do not pay again; check Orders after a moment.`, 'error');
           } finally {
+            setRazorpayOverlayMode(null);
             setIsPlacingOrder(false);
           }
         },
         modal: {
-          ondismiss: () => {
-            setIsPlacingOrder(false);
-            showToast('Payment is pending. You can retry safely from your orders.', 'info');
+          ondismiss: async () => {
+            setRazorpayOverlayMode(null);
+            try {
+              if (!paymentCompleted) {
+                await cancelPendingOrder('Payment window closed before payment');
+                syncCart(await cartService.getCart());
+                showToast('Payment cancelled. Your cart has been kept safely.', 'info');
+              }
+            } finally {
+              setIsPlacingOrder(false);
+            }
           },
         },
       });
       checkout.on('payment.failed', response => {
-        setIsPlacingOrder(false);
         showToast(response?.error?.description || 'Payment failed. Please try another method.', 'error');
       });
       checkout.open();
+      checkoutOpened = true;
+      setRazorpayOverlayMode(null);
     } catch (error) {
+      if (razorpay && !checkoutOpened) {
+        await cancelPendingOrder('Could not open the payment window');
+      }
+      setRazorpayOverlayMode(null);
       setIsPlacingOrder(false);
       showToast(error.message, 'error');
     }
@@ -680,6 +745,7 @@ function AppContent() {
 
       {/* 3. Global Toast System */}
       <OrderConfirmation order={confirmedOrder} onTrack={trackConfirmedOrder} />
+      <RazorpayLaunchOverlay mode={razorpayOverlayMode} />
 
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none">
         {toasts.map(t => (

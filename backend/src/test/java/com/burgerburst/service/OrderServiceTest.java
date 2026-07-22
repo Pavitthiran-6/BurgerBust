@@ -6,14 +6,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import com.burgerburst.config.CommerceProperties;
 import com.burgerburst.dto.order.OrderStatusUpdateRequest;
 import com.burgerburst.entity.CustomerOrder;
+import com.burgerburst.entity.Cart;
+import com.burgerburst.entity.CartItem;
 import com.burgerburst.entity.Inventory;
 import com.burgerburst.entity.OrderItem;
 import com.burgerburst.entity.OrderStatus;
+import com.burgerburst.entity.PaymentMethod;
 import com.burgerburst.entity.Product;
 import com.burgerburst.entity.User;
 import com.burgerburst.exception.BusinessRuleException;
@@ -133,6 +137,74 @@ class OrderServiceTest {
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
         verify(rewardService).refund(user.getUuid(), 50, order.getUuid());
         verify(inventoryHistoryRepository).save(any());
+    }
+
+    @Test
+    void unpaidRazorpayCancellationKeepsCartAndDoesNotRefundUnredeemedPoints() {
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
+        order.setPaymentMethod(PaymentMethod.RAZORPAY);
+        order.setRewardPointsUsed(50);
+        Product product = new Product();
+        product.setUuid(UUID.randomUUID());
+        product.setVisible(true);
+        OrderItem item = new OrderItem();
+        item.setProduct(product);
+        item.setProductUuid(product.getUuid());
+        item.setQuantity(1);
+        item.setUnitPrice(BigDecimal.TEN);
+        item.setLineTotal(BigDecimal.TEN);
+        order.addItem(item);
+        Inventory inventory = new Inventory();
+        inventory.setProduct(product);
+        inventory.setVisible(true);
+        inventory.setStockQuantity(2);
+        when(orderRepository.findByUuidAndUserUuidAndDeletedAtIsNull(order.getUuid(), user.getUuid()))
+                .thenReturn(Optional.of(order));
+        when(inventoryRepository.findForUpdateByProductUuidAndDeletedAtIsNull(product.getUuid()))
+                .thenReturn(Optional.of(inventory));
+        when(orderRepository.save(order)).thenReturn(order);
+
+        service.cancel(user.getUuid(), order.getUuid(), "Payment window closed");
+
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(inventory.getStockQuantity()).isEqualTo(3);
+        verify(rewardService, never()).refund(any(), any(Integer.class), any());
+        verify(couponRedemptionRepository, never()).findByOrderUuidAndDeletedAtIsNull(any());
+        verify(cartRepository, never()).save(any());
+    }
+
+    @Test
+    void verifiedRazorpayPaymentClearsOnlyPurchasedItemsAndConfirmsOrder() {
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
+        order.setPaymentMethod(PaymentMethod.RAZORPAY);
+        order.setCouponDiscount(BigDecimal.ZERO);
+        order.setRewardPointsUsed(0);
+        Product product = new Product();
+        product.setUuid(UUID.randomUUID());
+        OrderItem purchased = new OrderItem();
+        purchased.setProduct(product);
+        purchased.setProductUuid(product.getUuid());
+        purchased.setQuantity(1);
+        purchased.setUnitPrice(BigDecimal.TEN);
+        purchased.setLineTotal(BigDecimal.TEN);
+        order.addItem(purchased);
+        Cart cart = new Cart();
+        cart.setUser(user);
+        CartItem cartItem = new CartItem();
+        cartItem.setProduct(product);
+        cartItem.setQuantity(2);
+        cart.addItem(cartItem);
+        when(orderRepository.findForUpdateByUuidAndDeletedAtIsNull(order.getUuid()))
+                .thenReturn(Optional.of(order));
+        when(cartRepository.findByUserUuidAndDeletedAtIsNull(user.getUuid())).thenReturn(Optional.of(cart));
+        when(orderRepository.save(order)).thenReturn(order);
+
+        var response = service.completePaidOrder(order.getUuid());
+
+        assertThat(response.status()).isEqualTo(OrderStatus.CONFIRMED);
+        assertThat(cart.getItems()).singleElement().extracting(CartItem::getQuantity).isEqualTo(1);
+        verify(rewardService).redeem(user.getUuid(), 0, order.getUuid());
+        verify(cartRepository).save(cart);
     }
 
     @Test

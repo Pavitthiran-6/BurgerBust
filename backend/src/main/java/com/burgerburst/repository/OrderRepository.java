@@ -9,12 +9,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
 
 public interface OrderRepository extends JpaRepository<CustomerOrder, Long> {
     Page<CustomerOrder> findByUserUuidAndDeletedAtIsNullOrderByCreatedAtDesc(UUID userUuid, Pageable pageable);
     Optional<CustomerOrder> findByUuidAndUserUuidAndDeletedAtIsNull(UUID uuid, UUID userUuid);
     Optional<CustomerOrder> findByUuidAndDeletedAtIsNull(UUID uuid);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<CustomerOrder> findForUpdateByUuidAndDeletedAtIsNull(UUID uuid);
     boolean existsByUserUuidAndDeletedAtIsNull(UUID userUuid);
     long countByStatusAndDeletedAtIsNull(OrderStatus status);
 

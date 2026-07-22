@@ -99,28 +99,35 @@ public class OrderService {
         }
         validateRewardCap(request.rewardPoints(), pricing.rewardDiscount());
 
+        boolean awaitingOnlinePayment = request.paymentMethod() == com.burgerburst.entity.PaymentMethod.RAZORPAY;
         CustomerOrder order = buildOrder(cart, request, pricing);
+        if (awaitingOnlinePayment) order.setStatus(OrderStatus.PAYMENT_PENDING);
         for (CartItem cartItem : items) order.addItem(toOrderItem(cartItem));
-        addStatus(order, OrderStatus.PLACED, "Order placed");
+        addStatus(order, order.getStatus(), awaitingOnlinePayment ? "Waiting for payment" : "Order placed");
         orderRepository.save(order);
 
         for (int index = 0; index < items.size(); index++) {
             reserveInventory(inventories.get(index), items.get(index), userUuid, order.getOrderNumber());
         }
-        if (cart.getCoupon() != null) {
-            CouponRedemption redemption = new CouponRedemption();
-            redemption.setCoupon(cart.getCoupon());
-            redemption.setUser(cart.getUser());
-            redemption.setOrderUuid(order.getUuid());
-            redemption.setDiscountAmount(pricing.couponDiscount());
-            couponRedemptionRepository.save(redemption);
+        if (!awaitingOnlinePayment) completeCheckout(order, cart);
+        return toResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse completePaidOrder(UUID orderUuid) {
+        CustomerOrder order = orderRepository.findForUpdateByUuidAndDeletedAtIsNull(orderUuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        if (order.getStatus() == OrderStatus.CONFIRMED) return toResponse(order);
+        if (order.getStatus() != OrderStatus.PAYMENT_PENDING
+                || order.getPaymentMethod() != com.burgerburst.entity.PaymentMethod.RAZORPAY) {
+            throw rule("Order is not waiting for online payment");
         }
-        rewardService.redeem(userUuid, request.rewardPoints(), order.getUuid());
-        cart.getItems().clear();
-        cart.setCoupon(null);
-        cartRepository.save(cart);
-        publish(order, NotificationType.ORDER_CREATED, "Order placed",
-                "Your order " + order.getOrderNumber() + " has been placed.");
+        Cart cart = cartRepository.findByUserUuidAndDeletedAtIsNull(order.getUser().getUuid())
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+        completeCheckout(order, cart);
+        order.setStatus(OrderStatus.CONFIRMED);
+        addStatus(order, OrderStatus.CONFIRMED, "Payment verified");
+        orderRepository.save(order);
         return toResponse(order);
     }
 
@@ -164,7 +171,8 @@ public class OrderService {
     @Transactional
     public OrderResponse cancel(UUID userUuid, UUID orderUuid, String reason) {
         CustomerOrder order = findOwned(userUuid, orderUuid);
-        if (!EnumSet.of(OrderStatus.PLACED, OrderStatus.CONFIRMED).contains(order.getStatus())) {
+        if (!EnumSet.of(OrderStatus.PAYMENT_PENDING, OrderStatus.PLACED, OrderStatus.CONFIRMED)
+                .contains(order.getStatus())) {
             throw rule("Order can no longer be cancelled");
         }
         cancelInternal(order, trimToNull(reason));
@@ -277,7 +285,41 @@ public class OrderService {
                 "Reserved for " + orderNumber, userUuid);
     }
 
+    private void completeCheckout(CustomerOrder order, Cart cart) {
+        if (cart.getCoupon() != null && order.getCouponCode() != null
+                && cart.getCoupon().getCode().equalsIgnoreCase(order.getCouponCode())) {
+            CouponRedemption redemption = new CouponRedemption();
+            redemption.setCoupon(cart.getCoupon());
+            redemption.setUser(cart.getUser());
+            redemption.setOrderUuid(order.getUuid());
+            redemption.setDiscountAmount(order.getCouponDiscount());
+            couponRedemptionRepository.save(redemption);
+        }
+        rewardService.redeem(order.getUser().getUuid(), order.getRewardPointsUsed(), order.getUuid());
+        removePurchasedItems(cart, order);
+        cart.setCoupon(null);
+        cartRepository.save(cart);
+        publish(order, NotificationType.ORDER_CREATED, "Order placed",
+                "Your order " + order.getOrderNumber() + " has been placed.");
+    }
+
+    private void removePurchasedItems(Cart cart, CustomerOrder order) {
+        for (OrderItem purchased : order.getItems()) {
+            CartItem cartItem = cart.getItems().stream()
+                    .filter(item -> !item.isDeleted()
+                            && item.getProduct().getUuid().equals(purchased.getProductUuid()))
+                    .findFirst().orElse(null);
+            if (cartItem == null) continue;
+            if (cartItem.getQuantity() <= purchased.getQuantity()) {
+                cart.removeItem(cartItem);
+            } else {
+                cartItem.setQuantity(cartItem.getQuantity() - purchased.getQuantity());
+            }
+        }
+    }
+
     private void cancelInternal(CustomerOrder order, String reason) {
+        boolean paymentPending = order.getStatus() == OrderStatus.PAYMENT_PENDING;
         for (OrderItem item : order.getItems().stream()
                 .sorted(Comparator.comparing(OrderItem::getProductUuid)).toList()) {
             Inventory inventory = inventoryRepository.findForUpdateByProductUuidAndDeletedAtIsNull(item.getProductUuid())
@@ -293,11 +335,13 @@ public class OrderService {
             saveInventoryHistory(inventory, previous, next, InventoryChangeType.ORDER_CANCELLED,
                     "Restored from " + order.getOrderNumber(), order.getUser().getUuid());
         }
-        rewardService.refund(order.getUser().getUuid(), order.getRewardPointsUsed(), order.getUuid());
-        couponRedemptionRepository.findByOrderUuidAndDeletedAtIsNull(order.getUuid()).ifPresent(redemption -> {
-            redemption.markDeleted();
-            couponRedemptionRepository.save(redemption);
-        });
+        if (!paymentPending) {
+            rewardService.refund(order.getUser().getUuid(), order.getRewardPointsUsed(), order.getUuid());
+            couponRedemptionRepository.findByOrderUuidAndDeletedAtIsNull(order.getUuid()).ifPresent(redemption -> {
+                redemption.markDeleted();
+                couponRedemptionRepository.save(redemption);
+            });
+        }
         order.setStatus(OrderStatus.CANCELLED);
         order.setCancellationReason(reason == null ? "Cancelled by customer" : reason);
         addStatus(order, OrderStatus.CANCELLED, order.getCancellationReason());
@@ -431,6 +475,7 @@ public class OrderService {
 
     private static Map<OrderStatus, Set<OrderStatus>> transitions() {
         Map<OrderStatus, Set<OrderStatus>> transitions = new EnumMap<>(OrderStatus.class);
+        transitions.put(OrderStatus.PAYMENT_PENDING, EnumSet.of(OrderStatus.CONFIRMED, OrderStatus.CANCELLED));
         transitions.put(OrderStatus.PLACED, EnumSet.of(OrderStatus.CONFIRMED, OrderStatus.CANCELLED));
         transitions.put(OrderStatus.CONFIRMED, EnumSet.of(OrderStatus.PREPARING, OrderStatus.CANCELLED));
         transitions.put(OrderStatus.PREPARING, EnumSet.of(OrderStatus.READY));

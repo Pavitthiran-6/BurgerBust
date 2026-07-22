@@ -1,6 +1,7 @@
 package com.burgerburst.entity;
 
 public enum OrderStatus {
+    PAYMENT_PENDING,
     PLACED,
     CONFIRMED,
     PREPARING,
@@ -10,4 +11,3 @@ public enum OrderStatus {
     CANCELLED,
     REFUNDED
 }
-
