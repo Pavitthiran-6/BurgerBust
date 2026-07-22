@@ -167,7 +167,7 @@ export default function HomeView({
                 onClick={() => handleOpenProduct('Burger Boss Combo', 'Combos')}
                 className="bg-white text-black font-black text-3xl p-4 comic-border rounded-2xl shadow-[4px_4px_0px_0px_rgba(255,210,63,1)] hover:-translate-y-1 transition-transform cursor-pointer"
               >
-                ONLY $12.99
+                ONLY ₹12.99
               </button>
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function HomeView({
             onClick={() => handleOpenProduct('Cheesy Pal Pizza', 'Pizza')}
             className="absolute -bottom-8 -right-8 bg-[#FFD23F] comic-border w-32 h-32 rounded-full flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(17,17,17,1)] transform rotate-12 cursor-pointer hover:scale-105 transition-transform"
           >
-            <span className="font-black text-xl text-center">CHEESY!<br/>$3.50</span>
+            <span className="font-black text-xl text-center">CHEESY!<br/>₹3.50</span>
           </div>
         </div>
       </section>
@@ -347,7 +347,7 @@ export default function HomeView({
             <div>
               <h3 className="font-black text-xl mb-2 line-clamp-1">ITALO-TOON PASTA</h3>
               <div className="flex justify-between items-center mt-4">
-                <span className="text-xl font-black text-primary">${getProductPrice('Toon-tastic Pasta', 9.99).toFixed(2)}</span>
+                <span className="text-xl font-black text-primary">₹{getProductPrice('Toon-tastic Pasta', 9.99).toFixed(2)}</span>
                 <button 
                   onClick={() => handleAddHubItem('Toon-tastic Pasta', 'Pasta')}
                   aria-label="Add Toon-tastic Pasta"
@@ -370,7 +370,7 @@ export default function HomeView({
             <div>
               <h3 className="font-black text-xl mb-2 line-clamp-1">HERO WRAP</h3>
               <div className="flex justify-between items-center mt-4">
-                <span className="text-xl font-black text-primary">${getProductPrice('Hero Chicken Wrap', 6.99).toFixed(2)}</span>
+                <span className="text-xl font-black text-primary">₹{getProductPrice('Hero Chicken Wrap', 6.99).toFixed(2)}</span>
                 <button 
                   onClick={() => handleAddHubItem('Hero Chicken Wrap', 'Wraps')}
                   aria-label="Add Hero Chicken Wrap"
@@ -393,7 +393,7 @@ export default function HomeView({
             <div>
               <h3 className="font-black text-xl mb-2 line-clamp-1">ZAP SHAWARMA</h3>
               <div className="flex justify-between items-center mt-4">
-                <span className="text-xl font-black text-primary">${getProductPrice('Shawarma Scroll', 7.99).toFixed(2)}</span>
+                <span className="text-xl font-black text-primary">₹{getProductPrice('Shawarma Scroll', 7.99).toFixed(2)}</span>
                 <button 
                   onClick={() => handleAddHubItem('Shawarma Scroll', 'Wraps')}
                   aria-label="Add Shawarma Scroll"
@@ -416,7 +416,7 @@ export default function HomeView({
             <div>
               <h3 className="font-black text-xl mb-2 line-clamp-1">BOOM DOG</h3>
               <div className="flex justify-between items-center mt-4">
-                <span className="text-xl font-black text-primary">${getProductPrice('Boom Hot Dog', 5.99).toFixed(2)}</span>
+                <span className="text-xl font-black text-primary">₹{getProductPrice('Boom Hot Dog', 5.99).toFixed(2)}</span>
                 <button 
                   onClick={() => handleAddHubItem('Boom Hot Dog', 'Wraps')}
                   aria-label="Add Boom Hot Dog"
@@ -563,7 +563,7 @@ export default function HomeView({
               onClick={(e) => { e.stopPropagation(); handleAddProduct('Happy Pepperoni Pizza', 'Pizza'); }}
               className="bg-white text-[#1a1c1c] border-3 border-[#1a1c1c] shadow-[3px_3px_0px_0px_#FFD23F] px-5 py-2.5 rounded-xl font-black text-xs uppercase hover:bg-yellow-100 cursor-pointer"
             >
-              GRAB SLICE • $5.99
+              GRAB SLICE • ₹5.99
             </button>
           </div>
 
@@ -585,7 +585,7 @@ export default function HomeView({
               <div>
                 <span className="font-black text-sm text-[#1a1c1c] block">ADD TO ANY SHAKE</span>
                 <span className="font-extrabold text-xs text-gray-700">
-                  Only +${getProductPrice('Strawberry Waffle Sundae', 5.99).toFixed(2)} Extra!
+                  Only +₹{getProductPrice('Strawberry Waffle Sundae', 5.99).toFixed(2)} Extra!
                 </span>
               </div>
             </div>
@@ -593,7 +593,7 @@ export default function HomeView({
               onClick={() => handleAddProduct('Strawberry Waffle Sundae', 'Desserts')}
               className="w-full mt-5 bg-[#FFD23F] text-[#1a1c1c] comic-border py-3.5 font-black text-lg shadow-[4px_4px_0px_0px_rgba(17,17,17,1)] active:shadow-none active:translate-y-1 transition-all rounded-2xl cursor-pointer"
             >
-              BOOST MY MEAL! • ${getProductPrice('Strawberry Waffle Sundae', 5.99).toFixed(2)}
+              BOOST MY MEAL! • ₹{getProductPrice('Strawberry Waffle Sundae', 5.99).toFixed(2)}
             </button>
           </div>
         </div>
@@ -632,7 +632,7 @@ export default function HomeView({
             onClick={() => handleOpenProduct('The Classic Toon', 'Burger')}
             className="px-8 py-4 bg-[#34C759] text-white border-4 border-[#1a1c1c] shadow-[4px_4px_0px_0px_#111111] font-black text-sm uppercase rounded-2xl hover:bg-green-600 cursor-pointer"
           >
-            ORDER TODAY'S SPECIAL • ${getProductPrice('The Classic Toon', 7.99).toFixed(2)}
+            ORDER TODAY'S SPECIAL • ₹{getProductPrice('The Classic Toon', 7.99).toFixed(2)}
           </button>
         </div>
 
@@ -713,7 +713,7 @@ export default function HomeView({
               title: "ADVENTURER BUNDLE",
               desc: "1x Monster Burger + 1x Sidekick Fries + 1x Toon Shake",
               price: 12.99,
-              oldPrice: "$14.99",
+              oldPrice: "₹14.99",
               comboImage: "/foods/combo_adventurer.png",
               badge: "25% OFF BUNDLE",
               badgeBg: "bg-[#FF0055] text-white",
@@ -725,7 +725,7 @@ export default function HomeView({
               title: "TITANS PARTY PACK",
               desc: "2x Pepperoni Slices + 4x Fizzy Sodas + 1x Garlic Dip",
               price: 21.99,
-              oldPrice: "$24.99",
+              oldPrice: "₹24.99",
               comboImage: "/foods/combo_titans_party.png",
               badge: "FAMILY PARTY DEAL",
               badgeBg: "bg-[#00F0FF] text-[#1a1c1c]",
@@ -737,7 +737,7 @@ export default function HomeView({
               title: "POKÉMON CHEFS SPECIAL",
               desc: "1x Comic Pasta Bowl + 1x Sidekick Fries + 1x Shake",
               price: 13.99,
-              oldPrice: "$15.99",
+              oldPrice: "₹15.99",
               comboImage: "/foods/combo_pokemon_chef.png",
               badge: "CHEF SPECIAL",
               badgeBg: "bg-[#34C759] text-white",
@@ -766,7 +766,7 @@ export default function HomeView({
 
               <div className="flex justify-between items-center pt-4 border-t-3 border-dashed border-[#1a1c1c] mt-2">
                 <div>
-                  <span className="font-black text-xl text-[#FF0055] block">${getProductPrice(combo.productName, combo.price).toFixed(2)}</span>
+                  <span className="font-black text-xl text-[#FF0055] block">₹{getProductPrice(combo.productName, combo.price).toFixed(2)}</span>
                   <span className="text-xs font-bold text-gray-400 line-through">{combo.oldPrice}</span>
                 </div>
                 <button

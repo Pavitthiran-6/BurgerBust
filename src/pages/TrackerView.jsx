@@ -34,7 +34,7 @@ export default function TrackerView({ currentOrder, onCancelOrder, setCurrentPag
 
   const handleTipRider = (amount) => {
     setAddedTip(amount);
-    if (showToast) showToast(`Added $${amount.toFixed(2)} tip for Doraemon Rider! `, 'success');
+    if (showToast) showToast(`Added ₹${amount.toFixed(2)} tip for Doraemon Rider!`, 'success');
   };
 
   const handleSendMessage = (e) => {
@@ -243,7 +243,7 @@ export default function TrackerView({ currentOrder, onCancelOrder, setCurrentPag
               {[0, 1, 2, 5, 10].map(amt => (
                 <button key={amt} type="button" onClick={() => handleTipRider(amt)}
                   className={`px-4 py-2 border-2 border-[#1a1c1c] font-black text-xs uppercase rounded-xl cursor-pointer ${addedTip === amt ? 'bg-[#34C759] text-white' : 'bg-gray-100'}`}>
-                  {amt === 0 ? 'NO TIP' : `$${amt}`}
+                  {amt === 0 ? 'NO TIP' : `₹${amt}`}
                 </button>
               ))}
             </div>

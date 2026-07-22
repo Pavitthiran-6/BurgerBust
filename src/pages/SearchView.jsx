@@ -7,9 +7,9 @@ const TRENDING_SEARCHES = ['Monster Burger', 'Cheese Pizza', 'Happy Fries', 'Sun
 const POPULAR_SEARCHES = ['Burger', 'Pizza', 'Combo', 'Vegan', 'Spicy'];
 
 const PRICE_RANGES = [
-  { label: 'Under $5', min: 0, max: 5 },
-  { label: '$5 - $10', min: 5, max: 10 },
-  { label: 'Over $10', min: 10, max: 999 },
+  { label: 'Under ₹5', min: 0, max: 5 },
+  { label: '₹5 - ₹10', min: 5, max: 10 },
+  { label: 'Over ₹10', min: 10, max: 999 },
 ];
 
 export default function SearchView({

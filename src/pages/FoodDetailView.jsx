@@ -48,7 +48,6 @@ export default function FoodDetailView({
   const handleAddCurrentToCart = () => {
     if (onAddToCart) {
       onAddToCart(currentItem.id, selectedOptions, quantity);
-      if (showToast) showToast(`Added ${quantity}x ${currentItem.name} to Cart! `, 'success');
     }
   };
 
@@ -65,7 +64,7 @@ export default function FoodDetailView({
         1,
         18.99 // Set the custom price for combo
       );
-      if (showToast) showToast(`Claimed Adventurer's Combo Bundle for $18.99! ‍️`, 'success');
+      if (showToast) showToast(`Claimed Adventurer's Combo Bundle for ₹18.99!`, 'success');
     }
   };
 
@@ -221,7 +220,7 @@ export default function FoodDetailView({
               </p>
               
               <div className="flex items-center justify-between mt-4 gap-4 flex-wrap">
-                <span className="font-headline-lg text-2xl md:text-3xl font-extrabold text-on-background">${totalPrice.toFixed(2)}</span>
+                <span className="font-headline-lg text-2xl md:text-3xl font-extrabold text-on-background">₹{totalPrice.toFixed(2)}</span>
                 
                 <div className="flex items-center gap-2">
                   <div className="flex items-center bg-surface-container comic-border p-1 rounded-xl">
@@ -319,7 +318,7 @@ export default function FoodDetailView({
                     <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">{side.desc}</p>
                     <div className="mt-2 flex justify-between items-center w-full">
                       <span className="font-label-bold text-xs font-black bg-primary-container comic-border px-2 py-0.5 transform rotate-2">
-                        +${side.price.toFixed(2)}
+                        +₹{side.price.toFixed(2)}
                       </span>
                       <button 
                         type="button"
@@ -365,7 +364,7 @@ export default function FoodDetailView({
                     />
                   </div>
                   <span className="font-label-bold text-[10px] uppercase text-center bg-white comic-border px-2 py-0.5 w-full transform -rotate-2 mt-2 font-black">
-                    {top.name} (+${top.price.toFixed(2)})
+                    {top.name} (+₹{top.price.toFixed(2)})
                   </span>
                 </div>
               );
@@ -405,7 +404,7 @@ export default function FoodDetailView({
                         isSelected ? 'bg-green-400' : 'bg-[#ffd23f]'
                       }`}
                     >
-                      {isSelected ? '✅ Added' : `+$${sauce.price.toFixed(2)}`}
+                      {isSelected ? '✅ Added' : `+₹${sauce.price.toFixed(2)}`}
                     </button>
                   </li>
                 );
@@ -431,8 +430,8 @@ export default function FoodDetailView({
                 Get the Toon Boss Burger, Ninja Fries, and a Mystical Soda for one legendary price!
               </p>
               <div className="flex items-center gap-4 justify-center md:justify-start">
-                <span className="font-display-xl-mobile font-extrabold line-through opacity-50 text-xl">$22.99</span>
-                <span className="font-display-xl font-extrabold text-[#ba1a1a] text-4xl md:text-5xl drop-shadow-[2px_2px_0px_#111111]">$18.99</span>
+                <span className="font-display-xl-mobile font-extrabold line-through opacity-50 text-xl">₹22.99</span>
+                <span className="font-display-xl font-extrabold text-[#ba1a1a] text-4xl md:text-5xl drop-shadow-[2px_2px_0px_#111111]">₹18.99</span>
               </div>
               
               <button 

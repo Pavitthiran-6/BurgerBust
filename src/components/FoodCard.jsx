@@ -72,7 +72,7 @@ export default function FoodCard({ item, isFavorite, onToggleFavorite, onAddToCa
 
         {/* Price & Add to Cart button */}
         <div className="flex items-center justify-between border-t-4 border-on-secondary-fixed pt-4">
-          <span className="font-headline-xl text-headline-xl text-primary text-xl font-black">${item.price.toFixed(2)}</span>
+          <span className="font-headline-xl text-headline-xl text-primary text-xl font-black">₹{item.price.toFixed(2)}</span>
           <button
             type="button"
             disabled={isUnavailable}

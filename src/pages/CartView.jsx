@@ -23,6 +23,10 @@ export default function CartView({
   const platformFee = 0;
   const deliveryFee = summary?.deliveryFee ?? 3.99;
   const total = summary?.total ?? Math.max(0, subtotal - discount + gstTax + deliveryFee);
+  const currency = summary?.currency || 'INR';
+  const money = value => new Intl.NumberFormat('en-IN', {
+    style: 'currency', currency, minimumFractionDigits: 2,
+  }).format(Number(value || 0));
 
   const handleApplyCouponSubmit = (e) => {
     e.preventDefault();
@@ -90,7 +94,7 @@ export default function CartView({
                   <img src={item.image} alt={item.name} className="w-16 h-16 object-contain" />
                   <div>
                     <h3 className="font-black text-base uppercase text-[#1a1c1c]">{item.name}</h3>
-                    <span className="text-xs font-black text-[#FF0055]">${item.price.toFixed(2)}</span>
+                    <span className="text-xs font-black text-[#FF0055]">{money(item.price)}</span>
                   </div>
                 </div>
 
@@ -171,7 +175,7 @@ export default function CartView({
             {/* Estimated Savings Badge */}
             {discount > 0 && (
               <div className="bg-[#FFD23F] border-2 border-[#1a1c1c] p-2.5 rounded-xl text-center text-xs font-black uppercase">
-                 TOTAL ESTIMATED SAVINGS: ${discount.toFixed(2)}
+                 TOTAL ESTIMATED SAVINGS: {money(discount)}
               </div>
             )}
 
@@ -188,7 +192,7 @@ export default function CartView({
                       heroTip === amt ? 'bg-[#FFD23F] text-[#1a1c1c]' : 'bg-gray-100 text-gray-600'
                     }`}
                   >
-                    {amt === 0 ? 'NO TIP' : `$${amt}`}
+                    {amt === 0 ? 'NO TIP' : money(amt)}
                   </button>
                 ))}
               </div>
@@ -198,26 +202,26 @@ export default function CartView({
             <div className="space-y-2 text-xs font-bold border-t-2 border-dashed border-[#1a1c1c] pt-4">
               <div className="flex justify-between">
                 <span>SUBTOTAL</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>{money(subtotal)}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-green-600 font-black">
                   <span>COUPON DISCOUNT ({discountPercent}%)</span>
-                  <span>-${discount.toFixed(2)}</span>
+                  <span>-{money(discount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-gray-600">
                 <span>5% GST TAX</span>
-                <span>${gstTax.toFixed(2)}</span>
+                <span>{money(gstTax)}</span>
               </div>
-              {platformFee > 0 && <div className="flex justify-between text-gray-600"><span>PLATFORM HANDLING FEE</span><span>${platformFee.toFixed(2)}</span></div>}
+              {platformFee > 0 && <div className="flex justify-between text-gray-600"><span>PLATFORM HANDLING FEE</span><span>{money(platformFee)}</span></div>}
               <div className="flex justify-between text-gray-600">
                 <span>ANYWHERE DOOR DISPATCH</span>
-                <span>${deliveryFee.toFixed(2)}</span>
+                <span>{money(deliveryFee)}</span>
               </div>
               <div className="flex justify-between text-base font-black border-t-2 border-[#1a1c1c] pt-2 text-[#FF0055]">
                 <span>TOTAL AMOUNT</span>
-                <span>${total.toFixed(2)}</span>
+                <span>{money(total)}</span>
               </div>
             </div>
 

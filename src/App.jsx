@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useCallback, useState, useEffect } from 'react';
+import React, { lazy, Suspense, useCallback, useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -23,6 +23,7 @@ import TrackerView from './pages/TrackerView';
 import SearchView from './pages/SearchView';
 import CategoriesView from './pages/CategoriesView';
 import CartoonLoader from './components/CartoonLoader';
+import OrderConfirmation from './components/OrderConfirmation';
 import { productService } from './services/productService';
 import { categoryService } from './services/categoryService';
 import { useRestaurantStatus } from './hooks/useRestaurantStatus';
@@ -31,6 +32,7 @@ import { orderService } from './services/orderService';
 import { rewardService } from './services/rewardService';
 import { notificationService } from './services/notificationService';
 import { paymentService } from './services/paymentService';
+import { addressService } from './services/addressService';
 import { Analytics } from './hooks/useAnalytics';
 
 const AdminApp = lazy(() => import('./admin/AdminApp'));
@@ -108,7 +110,9 @@ function AppContent() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [confirmedOrder, setConfirmedOrder] = useState(null);
   const [toasts, setToasts] = useState([]);
+  const confirmationTimerRef = useRef(null);
   const restaurantStatus = useRestaurantStatus();
 
   useEffect(() => {
@@ -164,6 +168,10 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, [finishSplash, isLoading]);
 
+  useEffect(() => () => {
+    if (confirmationTimerRef.current) clearTimeout(confirmationTimerRef.current);
+  }, []);
+
   // Page transition effect
   const triggerComicTransition = () => {
     setIsNavigating(true);
@@ -214,6 +222,21 @@ function AppContent() {
       window.history.pushState(null, '', targetPath);
     }
     window.scrollTo(0, 0);
+  };
+
+  const openOrderConfirmation = order => {
+    if (confirmationTimerRef.current) clearTimeout(confirmationTimerRef.current);
+    setConfirmedOrder(order);
+    confirmationTimerRef.current = setTimeout(() => {
+      setConfirmedOrder(null);
+      setCurrentPage('tracker');
+    }, 2600);
+  };
+
+  const trackConfirmedOrder = () => {
+    if (confirmationTimerRef.current) clearTimeout(confirmationTimerRef.current);
+    setConfirmedOrder(null);
+    setCurrentPage('tracker');
   };
 
   // Listen for browser Back/Forward arrows
@@ -280,12 +303,16 @@ function AppContent() {
       orderService.getOrders(),
       rewardService.getRewards(),
       notificationService.getNotifications(),
+      addressService.list(),
     ]);
-    const [cartResult, orderResult, rewardResult, notificationResult] = results;
+    const [cartResult, orderResult, rewardResult, notificationResult, addressResult] = results;
     if (cartResult.status === 'fulfilled') syncCart(cartResult.value);
     if (orderResult.status === 'fulfilled') setOrders(orderResult.value.items);
     if (rewardResult.status === 'fulfilled') setRewardPoints(rewardResult.value.balance);
     if (notificationResult.status === 'fulfilled') setNotifications(notificationResult.value.items);
+    if (addressResult.status === 'fulfilled') {
+      setAddresses(previous => addressResult.value.length > 0 ? addressResult.value : previous);
+    }
     const failure = results.find(result => result.status === 'rejected');
     setCommerceError(failure?.reason?.message || null);
     setCommerceLoading(false);
@@ -448,6 +475,56 @@ function AppContent() {
 
   const handleApiAutoCoupon = () => handleApiCoupon('WELCOME20');
 
+  const handleAddAddress = async address => {
+    try {
+      const saved = await addressService.create({
+        ...address,
+        default: !addresses.some(item => item.default),
+      });
+      setAddresses(previous => [
+        ...previous.map(item => saved.default ? { ...item, default: false } : item),
+        saved,
+      ]);
+      showToast(`Saved delivery address: ${saved.title}!`, 'success');
+      return saved;
+    } catch (error) {
+      showToast(error.message, 'error');
+      throw error;
+    }
+  };
+
+  const handleSetDefaultAddress = async addressId => {
+    try {
+      if (typeof addressId === 'string' && addressId.includes('-')) {
+        const selected = await addressService.setDefault(addressId);
+        setAddresses(previous => previous.map(item => ({
+          ...item,
+          default: item.id === selected.id,
+        })));
+      } else {
+        setAddresses(previous => previous.map(item => ({ ...item, default: item.id === addressId })));
+      }
+      showToast('Default delivery address updated.', 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  };
+
+  const handleDeleteAddress = async addressId => {
+    try {
+      if (typeof addressId === 'string' && addressId.includes('-')) {
+        await addressService.delete(addressId);
+        const refreshed = await addressService.list();
+        setAddresses(refreshed);
+      } else {
+        setAddresses(previous => previous.filter(item => item.id !== addressId));
+      }
+      showToast('Delivery address removed.', 'info');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  };
+
   const handleApiPlaceOrder = async (deliveryAddress, selectedPayment, rewardPointsToUse = 0) => {
     if (isPlacingOrder) return;
     setIsPlacingOrder(true);
@@ -471,7 +548,8 @@ function AppContent() {
       if (!razorpay) {
         showToast(`Order ${order.orderNumber} placed successfully!`, 'success');
         await refreshCommerceData();
-        setCurrentPage('tracker');
+        openOrderConfirmation(order);
+        setIsPlacingOrder(false);
         return;
       }
       const idempotencyKey = window.crypto?.randomUUID?.() || `${order.id}-${Date.now()}`;
@@ -484,24 +562,43 @@ function AppContent() {
         name: 'BurgerBurst',
         description: `Order ${order.orderNumber}`,
         order_id: payment.razorpayOrderId,
-        prefill: { name: profile.name, email: profile.email, contact: profile.phone },
+        prefill: { name: address.recipientName, email: profile.email, contact: address.phone },
+        notes: { burgerburst_order: order.orderNumber },
+        theme: { color: '#FF0055', backdrop_color: '#1a1c1c' },
+        retry: { enabled: true },
+        config: {
+          display: {
+            sequence: ['upi', 'netbanking', 'wallet', 'card'],
+            preferences: { show_default_blocks: true },
+          },
+        },
         handler: async response => {
           try {
             await paymentService.verify(response);
-            showToast('Payment verified successfully!', 'success');
+            showToast(`Payment verified for ${order.orderNumber}!`, 'success');
             await refreshCommerceData();
-            setCurrentPage('tracker');
+            openOrderConfirmation(order);
           } catch (error) {
             showToast(error.message, 'error');
+          } finally {
+            setIsPlacingOrder(false);
           }
         },
-        modal: { ondismiss: () => showToast('Payment is pending. You can retry safely.', 'info') },
+        modal: {
+          ondismiss: () => {
+            setIsPlacingOrder(false);
+            showToast('Payment is pending. You can retry safely from your orders.', 'info');
+          },
+        },
+      });
+      checkout.on('payment.failed', response => {
+        setIsPlacingOrder(false);
+        showToast(response?.error?.description || 'Payment failed. Please try another method.', 'error');
       });
       checkout.open();
     } catch (error) {
-      showToast(error.message, 'error');
-    } finally {
       setIsPlacingOrder(false);
+      showToast(error.message, 'error');
     }
   };
 
@@ -582,11 +679,13 @@ function AppContent() {
       {isNavigating && <Suspense fallback={null}><ComicPageTransition /></Suspense>}
 
       {/* 3. Global Toast System */}
+      <OrderConfirmation order={confirmedOrder} onTrack={trackConfirmedOrder} />
+
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none">
         {toasts.map(t => (
           <div
             key={t.id}
-            className={`pointer-events-auto px-5 py-3 border-4 border-[#1a1c1c] shadow-[4px_4px_0px_0px_#111111] font-black text-xs uppercase rounded-2xl animate-bounce ${
+            className={`pointer-events-auto px-5 py-3 border-4 border-[#1a1c1c] shadow-[4px_4px_0px_0px_#111111] font-black text-xs uppercase rounded-2xl ${
               t.type === 'success' ? 'bg-[#34C759] text-white' :
               t.type === 'error' ? 'bg-red-500 text-white' :
               t.type === 'warning' ? 'bg-[#FFD23F] text-[#1a1c1c]' :
@@ -701,6 +800,8 @@ function AppContent() {
                   rewardPoints={rewardPoints}
                   isPlacingOrder={isPlacingOrder}
                   onPlaceOrder={handleApiPlaceOrder}
+                  onAddAddress={handleAddAddress}
+                  profile={profile}
                   setCurrentPage={setCurrentPage}
                   showToast={showToast}
                 />
@@ -741,8 +842,9 @@ function AppContent() {
               return (
                 <AddressView
                   addresses={addresses}
-                  setAddresses={setAddresses}
-                  showToast={showToast}
+                  onAddAddress={handleAddAddress}
+                  onSetDefaultAddress={handleSetDefaultAddress}
+                  onDeleteAddress={handleDeleteAddress}
                   profile={profile}
                 />
               );
@@ -788,6 +890,7 @@ function AppContent() {
                   onLogout={handleLogout}
                   showToast={showToast}
                   setCurrentPage={setCurrentPage}
+                  initialTab={currentPage === 'orders' ? 'ORDERS' : 'PROFILE'}
                 />
               );
 
@@ -872,21 +975,6 @@ function AppContent() {
           showToast={showToast}
           setCurrentPage={setCurrentPage}
         />
-      )}
-
-      {/*  Floating Cart Bubble — Mobile Only */}
-      {cart.length > 0 && currentPage !== 'cart' && currentPage !== 'checkout' && (
-        <button
-          type="button"
-          onClick={() => setCurrentPage('cart')}
-          className="fixed bottom-20 right-4 z-40 md:hidden bg-[#FF0055] text-white border-4 border-[#1a1c1c] shadow-[4px_4px_0px_0px_#111111] rounded-full w-16 h-16 flex flex-col items-center justify-center cursor-pointer animate-bounce"
-          aria-label="Open Cart"
-        >
-          <span className="text-xl"></span>
-          <span className="text-[10px] font-black">
-            {cart.reduce((a, i) => a + i.quantity, 0)}
-          </span>
-        </button>
       )}
 
       {/*  Mobile Bottom Navigation */}

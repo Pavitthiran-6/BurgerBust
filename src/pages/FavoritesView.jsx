@@ -119,7 +119,7 @@ export default function FavoritesView({ favorites = [], menuItems = [], onToggle
                   {/* Price & Action Buttons */}
                   <div className="mt-auto pt-3 border-t-3 border-[#1a1c1c] flex items-center justify-between gap-2">
                     <span className="font-black text-xl text-[#1a1c1c]">
-                      ${item.price.toFixed(2)}
+                      ₹{item.price.toFixed(2)}
                     </span>
 
                     <div className="flex items-center gap-2">

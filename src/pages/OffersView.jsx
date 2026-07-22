@@ -25,7 +25,7 @@ function CouponCard({ coupon, onCopyCode, onApply, copiedCode }) {
         </div>
         <h3 className="font-display-xl text-2xl font-black uppercase mb-1">{coupon.title}</h3>
         <p className="text-xs font-bold opacity-90 mb-1">{coupon.desc}</p>
-        <p className="text-[10px] font-bold opacity-70">Min spend: ${coupon.minSpend.toFixed(2)} • Max discount: ${coupon.maxDiscount.toFixed(2)}</p>
+        <p className="text-[10px] font-bold opacity-70">Min spend: ₹{coupon.minSpend.toFixed(2)} • Max discount: ₹{coupon.maxDiscount.toFixed(2)}</p>
         {coupon.firstOrderOnly && <span className="text-[10px] font-black uppercase mt-1 block"> FIRST ORDER ONLY</span>}
       </div>
 
