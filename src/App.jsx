@@ -379,9 +379,16 @@ function AppContent() {
       'combo-adventurer': 'Adventurer Combo',
       'combo-titans-party': 'Titans Party Combo',
     };
-    const item = menuItems.find(value => value.id === itemId)
+    let item = menuItems.find(value => value.id === itemId)
       || menuItems.find(value => value.name === legacyNames[itemId]);
-    if (!item) return;
+    if (!item) {
+      try {
+        item = await productService.getProduct(itemId);
+      } catch (error) {
+        showToast(error.message || 'Unable to load that product.', 'error');
+        return;
+      }
+    }
     try {
       syncCart(await cartService.addItem(item.id, quantity));
       Analytics.addedToCart(item.id, item.name, item.price);

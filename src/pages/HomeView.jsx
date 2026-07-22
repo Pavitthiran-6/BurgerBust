@@ -1,5 +1,35 @@
 import React from 'react';
 
+const HOME_PRODUCT_IDS = {
+  'The Classic Toon': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+  'Cheesy Chibi Burger': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+  'Cheesy Pal Pizza': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3',
+  'Happy Pepperoni Pizza': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4',
+  'Toon-tastic Pasta': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa5',
+  'Burger Boss Combo': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6',
+  'Adventurer Combo': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa7',
+  'Titans Party Combo': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa8',
+  'Happy Fries': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa10',
+  'Sunny Shake': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11',
+  'Pokemon Chef Combo': 'b0000000-0000-4000-8000-000000000001',
+  'Inferno Hero Wings': 'b0000000-0000-4000-8000-000000000002',
+  'Dragon Fried Chicken': 'b0000000-0000-4000-8000-000000000003',
+  'Midnight Tacos': 'b0000000-0000-4000-8000-000000000004',
+  'Hero Chicken Wrap': 'b0000000-0000-4000-8000-000000000005',
+  'Shawarma Scroll': 'b0000000-0000-4000-8000-000000000006',
+  'Boom Hot Dog': 'b0000000-0000-4000-8000-000000000007',
+  'Crispy Hero Sandwich': 'b0000000-0000-4000-8000-000000000008',
+  'Pink Power Donut': 'b0000000-0000-4000-8000-000000000009',
+  'Fudge Brownie Stack': 'b0000000-0000-4000-8000-000000000010',
+  'Strawberry Power Shake': 'b0000000-0000-4000-8000-000000000011',
+  'Loaded Power Nachos': 'b0000000-0000-4000-8000-000000000013',
+  'Stretchy Mozzarella Sticks': 'b0000000-0000-4000-8000-000000000014',
+  'Hero Chicken Salad': 'b0000000-0000-4000-8000-000000000015',
+  'Crispy Fish Hero Burger': 'b0000000-0000-4000-8000-000000000016',
+  'Strawberry Waffle Sundae': 'b0000000-0000-4000-8000-000000000017',
+  'Golden Onion Rings': 'b0000000-0000-4000-8000-000000000018',
+  'Mystic Iced Coffee': 'b0000000-0000-4000-8000-000000000019',
+};
 
 export default function HomeView({
   menuItems = [],
@@ -23,8 +53,9 @@ export default function HomeView({
 
   const handleOpenProduct = (productName, fallbackCategory = 'All') => {
     const item = findProduct(productName);
-    if (item && onViewDetail) {
-      onViewDetail(item.id);
+    const productId = item?.id || HOME_PRODUCT_IDS[productName];
+    if (productId && onViewDetail) {
+      onViewDetail(productId);
       return;
     }
     handleGoToMenu(fallbackCategory);
@@ -32,8 +63,9 @@ export default function HomeView({
 
   const handleAddProduct = (productName, fallbackCategory = 'All') => {
     const item = findProduct(productName);
-    if (item && onAddDirectItem) {
-      onAddDirectItem(item.id);
+    const productId = item?.id || HOME_PRODUCT_IDS[productName];
+    if (productId && onAddDirectItem) {
+      onAddDirectItem(productId);
       return;
     }
     handleGoToMenu(fallbackCategory);
