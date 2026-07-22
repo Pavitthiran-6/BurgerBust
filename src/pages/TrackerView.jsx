@@ -3,11 +3,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 const DEMO_INTERVAL_MS = 60_000;
 
 const STEPS = [
-  { label: 'Order Received', icon: 'receipt_long' },
-  { label: 'Preparing Food', icon: 'restaurant' },
-  { label: 'Cooking', icon: 'local_fire_department' },
-  { label: 'Out For Delivery', icon: 'two_wheeler' },
-  { label: 'Delivered', icon: 'home' },
+  { label: 'Order Received', icon: 'receipt_long', bubble: 'Printing your kitchen ticket!' },
+  { label: 'Preparing Food', icon: 'restaurant', bubble: 'Chopping the freshest veggies!' },
+  { label: 'Cooking', icon: 'local_fire_department', bubble: 'Sizzle! Your feast is cooking!' },
+  { label: 'Out For Delivery', icon: 'two_wheeler', bubble: 'Vroom! Your order is on the way!' },
+  { label: 'Delivered', icon: 'home', bubble: 'Ding dong! Your feast has arrived!' },
 ];
 
 const STATUS_STEP = {
@@ -193,6 +193,14 @@ export default function TrackerView({ currentOrder, onCancelOrder, showToast, se
 
               return (
                 <article key={step.label} className="relative flex min-w-0 justify-center text-center">
+                  {active && (
+                    <div className="absolute left-1/2 top-0 z-30 w-[94%] max-w-36 -translate-x-1/2 animate-bounce">
+                      <div className="speech-bubble rounded-lg border-2 border-black bg-white p-1.5 text-center text-[7px] font-black leading-[1.05] shadow-[3px_3px_0px_0px_#111111] sm:text-[9px] md:rounded-xl md:text-xs">
+                        “{step.bubble}”
+                      </div>
+                    </div>
+                  )}
+
                   <div className={`absolute left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full transition-all duration-700 ease-out ${
                     completed
                       ? 'top-[210px] h-[clamp(3.25rem,7vw,5.5rem)] w-[clamp(3.25rem,7vw,5.5rem)] bg-primary-container'
