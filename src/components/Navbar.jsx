@@ -16,7 +16,12 @@ export default function Navbar({
       <div className="flex justify-between items-center w-full px-4 md:px-12 py-stack-sm h-24">
         {/* Logo */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-          <span className="font-headline-xl text-3xl md:text-4xl lg:text-5xl font-black text-[#1c1b1b] uppercase tracking-tighter hover:scale-105 transition-transform">
+          <img
+            src="/logo.png"
+            alt="BurgerBurst Logo"
+            className="w-12 h-12 rounded-full border-3 border-[#1a1c1c] shadow-[3px_3px_0px_0px_#111111] object-cover bg-white hover:scale-105 transition-transform"
+          />
+          <span className="font-headline-xl text-2xl md:text-3xl lg:text-4xl font-black text-[#1c1b1b] uppercase tracking-tighter hover:scale-105 transition-transform">
             BURGERBURST
           </span>
           {restaurantStatus && (
